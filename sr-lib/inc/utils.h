@@ -3,9 +3,6 @@
 #include <string>
 #include <vector>
 
-#define RECORD_FOLDER ".\\Record\\"
-#define DEFAULT_DURATION 0.8
-
 /// Captures the audio for given duration and saves it in the given file.
 void capture_audio(std::string filename, double duration);
 
