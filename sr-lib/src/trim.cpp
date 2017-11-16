@@ -149,15 +149,15 @@ pair<vector<double>, pair<vector<double>, vector<double>>> trim_by_auto(const ve
 	}
 
 	vector<double> trimmed_amplitudes;
-	for (int i = N1; i <= N2; ++i) {
+	for (int i = F1; i <= F2; ++i) {
 		trimmed_amplitudes.insert(trimmed_amplitudes.end(), chunked_amplitudes[i].begin(), chunked_amplitudes[i].end());
 	}
 	vector<double> start_noise;
-	for (int i = 0; i < N1; ++i) {
+	for (int i = 0; i < F1; ++i) {
 		start_noise.insert(start_noise.end(), chunked_amplitudes[i].begin(), chunked_amplitudes[i].end());
 	}
 	vector<double> end_noise;
-	for (int i = N2; i < chunked_amplitudes.size(); ++i) {
+	for (int i = F2; i < chunked_amplitudes.size(); ++i) {
 		end_noise.insert(end_noise.end(), chunked_amplitudes[i].begin(), chunked_amplitudes[i].end());
 	}
 
