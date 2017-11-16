@@ -1,6 +1,7 @@
 #include "trim.h"
 
 #include <algorithm>
+#include <cmath>
 #include <numeric>
 #include <tuple>
 

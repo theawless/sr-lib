@@ -1,5 +1,6 @@
 #include "maths.h"
 
+#include <cmath>
 #include <numeric>
 
 using namespace std;

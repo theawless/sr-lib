@@ -1,6 +1,7 @@
 #include "hmm.h"
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <tuple>
 #include <vector>

@@ -1,6 +1,7 @@
 #include "audio.h"
 
 #include <algorithm>
+#include <cmath>
 #include <numeric>
 
 #include "utils.h"
