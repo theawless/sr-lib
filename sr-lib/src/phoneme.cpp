@@ -9,7 +9,7 @@
 using namespace std;
 
 /// Calculates autocorrelation for clipped values.
-static vector<double> autocorrelation(const vector<double> &f, int mi, int mf) {
+static vector<double> autocorrelation_normalised(const vector<double> &f, int mi, int mf) {
 	vector<double> AC(mf + 1 - mi, 0.0);
 
 	for (int i = mi; i < mf + 1; ++i) {
@@ -76,7 +76,7 @@ static bool is_voiced(const vector<double> &frame) {
 	double threshold = clip_threshold(frame);
 	vector<double> clipped_thresholds = clip(frame, threshold);
 	double R0 = autocorrelation(clipped_thresholds, 0, 0)[0];
-	vector<double> R = autocorrelation(clipped_thresholds, 20, 200);
+	vector<double> R = autocorrelation_normalised(clipped_thresholds, 20, 200);
 	vector<double> linear_R = linear_window(R);
 
 	double R_threshold = 0.3 * R0;
