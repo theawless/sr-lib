@@ -4,15 +4,14 @@
 #include "audio.h"
 #include "codebook.h"
 #include "hmm.h"
-#include "lpc.h"
+#include "lpcc.h"
 #include "utils.h"
 
 #define RECORD_DURATION 0.8
 #define RECORD_FOLDER "B:\\record\\digit_0.8\\"
 
-#define N_VALUE 8
-#define M_VALUE 32
-#define T_VALUE 160
+#define N_VALUE 5
+#define M_VALUE 8
 
 #define N_RETRAIN 3
 #define N_TRAIN_UTTERANCES 15
@@ -195,7 +194,7 @@ static int decide_digit(const vector<Model> &models, const vector<int> observati
 }
 
 /// The entry of the program, it takes user input, calls required functions and outputs the results.
-int main() {
+int main1() {
 	vector<vector<double>> codebook = get_codebook();
 	vector<Model> models = get_models(codebook);
 
@@ -209,6 +208,32 @@ int main() {
 		vector<int> observations = get_observations(TEST_FILENAME, codebook, false);
 		cout << "The recognised digit is: " << decide_digit(models, observations) << endl;
 	}
+
+	return 0;
+}
+
+int main() {
+	vector<int> n_hits(10, 0);
+	vector<vector<double>> codebook = get_codebook();
+	vector<Model> models = get_models(codebook);
+
+	for (string roll : TRAIN_ROLLS) {
+		for (int i = 0; i < 10; ++i) {
+			for (int j = 1; j <= N_TRAIN_UTTERANCES; ++j) {
+				string test_filename = string(RECORD_FOLDER) + roll + "_" + to_string(i) + "_" + pad_number(j, N_TRAIN_UTTERANCES);
+				vector<int> observations = get_observations(test_filename, codebook, false);
+				int digit = decide_digit(models, observations);
+				cout << "The recognised digit is: " << digit << endl;
+				if (i == digit) n_hits[i]++;
+			}
+		}
+	}
+
+	int total_n_hits = 0;
+	for (int n_hit : n_hits) {
+		total_n_hits += n_hit;
+	}
+	cout << "n_hits is: " << total_n_hits;
 
 	return 0;
 }

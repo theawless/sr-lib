@@ -15,7 +15,7 @@
 
 #include "audio.h"
 #include "trim.h"
-#include "lpc.h"
+#include "lpcc.h"
 #include "utils.h"
 
 #define RECORD_DURATION 0.8
