@@ -25,6 +25,18 @@ static vector<double> fix_dc_offset(const vector<double> &amplitudes) {
 	return vec;
 }
 
+/// Premphasize - boost the higher frequencies.
+static vector<double> preemphasize(const vector<double> &amplitudes) {
+	const double alpha = 0.95;
+	vector<double> vec(amplitudes);
+
+	for (int i = 1; i < vec.size(); ++i) {
+		vec[i] -= alpha * amplitudes[i - 1];
+	}
+
+	return vec;
+}
+
 /// Normalise amplitudes of the signal.
 static vector<double> normalise(const vector<double> &amplitudes) {
 	vector<double> vec(amplitudes.size());
@@ -40,8 +52,9 @@ static vector<double> normalise(const vector<double> &amplitudes) {
 vector<double> preprocess(const vector<double> &amplitudes) {
 	vector<double> dc_fixed_amplitudes = fix_dc_offset(amplitudes);
 	vector<double> normalised_amplitudes = normalise(dc_fixed_amplitudes);
+	vector<double> preemphasize_amplitudes = preemphasize(normalised_amplitudes);
 
-	return normalised_amplitudes;
+	return preemphasize_amplitudes;
 }
 
 vector<vector<double>> fixed_segment(const vector<double> &amplitudes) {
