@@ -13,6 +13,9 @@ namespace std {
 /// Calculates alpha values and P(O|lambda).
 std::pair<double, std::vector<std::vector<double>>> forward(const std::Model &lambda, const std::vector<int> &o);
 
+/// Calculates alpha values and P(O|lambda).
+std::pair<double, std::vector<std::vector<double>>> forward_scaled(const std::Model &lambda, const std::vector<int> &o);
+
 /// Gets the base feed forward model.
 std::Model bakis(int N, int M);
 

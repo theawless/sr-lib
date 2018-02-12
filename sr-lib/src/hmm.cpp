@@ -6,8 +6,9 @@
 #include <tuple>
 #include <vector>
 
-#define OPTIMISE_CONVERGENCE_THRESHOLD 1.01
+#define OPTIMISE_CONVERGENCE_THRESHOLD 1.001
 #define OPTIMISE_CONVERGENCE_MAX_ITERATIONS 50
+#define MINIMUM_PROBABILITY 10e-60
 
 using namespace std;
 
@@ -24,6 +25,41 @@ pair<double, vector<vector<double>>> forward(const Model &lambda, const vector<i
 				alpha[t + 1][i] += alpha[t][j] * lambda.a[j][i];
 			}
 			alpha[t + 1][i] *= lambda.b[i][o[t + 1]];
+		}
+	}
+
+	double P = 0.0;
+	for (int i = 0; i < N; ++i) {
+		P += alpha[T - 1][i];
+	}
+
+	return pair<double, vector<vector<double>>>(P, alpha);
+}
+
+pair<double, vector<vector<double>>> forward_scaled(const Model &lambda, const vector<int> &o) {
+	int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
+	double C = 0;
+
+	vector<vector<double>> alpha(T, vector<double>(N, 0.0));
+	for (int i = 0; i < N; ++i) {
+		alpha[0][i] = lambda.pi[i] * lambda.b[i][o[0]];
+		C += alpha[0][i];
+	}
+	for (int i = 0; i < N; ++i) {
+		alpha[0][i] /= C;
+	}
+
+	for (int t = 0; t < T - 1; ++t) {
+		C = 0;
+		for (int i = 0; i < N; ++i) {
+			for (int j = 0; j < N; ++j) {
+				alpha[t + 1][i] += alpha[t][j] * lambda.a[j][i];
+			}
+			alpha[t + 1][i] *= lambda.b[i][o[t + 1]];
+			C += alpha[t + 1][i];
+		}
+		for (int i = 0; i < N; ++i) {
+			alpha[t + 1][i] /= C;
 		}
 	}
 
@@ -54,6 +90,36 @@ static vector<vector<double>> backward(const Model &lambda, const vector<int> &o
 	return beta;
 }
 
+/// Calculates beta values.
+static vector<vector<double>> backward_scaled(const Model &lambda, const vector<int> &o) {
+	int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
+	double C = 0;
+
+	vector<vector<double>> beta(T, vector<double>(N, 0.0));
+	for (int i = 0; i < N; ++i) {
+		beta[T - 1][i] = 1;
+		C += beta[T - 1][i];
+	}
+	for (int i = 0; i < N; ++i) {
+		beta[T - 1][i] /= C;
+	}
+
+	for (int t = T - 2; t >= 0; --t) {
+		C = 0;
+		for (int i = 0; i < N; ++i) {
+			for (int j = 0; j < N; ++j) {
+				beta[t][i] += beta[t + 1][j] * lambda.a[i][j] * lambda.b[j][o[t + 1]];
+			}
+			C += beta[t][i];
+		}
+		for (int i = 0; i < N; ++i) {
+			beta[t][i] /= C;
+		}
+	}
+
+	return beta;
+}
+
 /// Calculates P* and optimal states.
 static pair<double, vector<int>> viterbi(const Model &lambda, const vector<int> &o) {
 	int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
@@ -74,6 +140,43 @@ static pair<double, vector<int>> viterbi(const Model &lambda, const vector<int> 
 				}
 			}
 			delta[t + 1][i] *= lambda.b[i][o[t + 1]];
+		}
+	}
+
+	vector<int> q(T, 0.0);
+	q[T - 1] = max_element(delta[T - 1].begin(), delta[T - 1].end()) - delta[T - 1].begin();
+	for (int i = T - 2; i >= 0; --i) {
+		q[i] = psi[q[i + 1]];
+	}
+	double P_star = delta[T - 1][q[T - 1]];
+
+	return pair<double, vector<int>>(P_star, q);
+}
+
+/// Calculates P* and optimal states.
+static pair<double, vector<int>> viterbi_logged(const Model &lambda, const vector<int> &o) {
+	int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
+
+	vector<int> psi(T, 0.0);
+	vector<vector<double>> delta(T, vector<double>(N, 0.0));
+	for (int i = 0; i < N; ++i) {
+		double temp = lambda.pi[i];
+		if (temp == 0) {
+			temp = MINIMUM_PROBABILITY;
+		}
+		delta[0][i] = log(temp) + log(lambda.b[i][o[0]]);
+	}
+	for (int t = 0; t < T - 1; ++t) {
+		for (int i = 0; i < N; ++i) {
+			delta[t + 1][i] = numeric_limits<double>::min();
+			for (int j = 0; j < N; ++j) {
+				double current_max_delta = delta[t][j] + log(lambda.a[j][i]);
+				if (delta[t + 1][i] < current_max_delta) {
+					delta[t + 1][i] = current_max_delta;
+					psi[i] = j;
+				}
+			}
+			delta[t + 1][i] += lambda.b[i][o[t + 1]];
 		}
 	}
 
@@ -224,7 +327,32 @@ static Model tweak(const Model &old_lambda) {
 	int M = lambda.b[0].size(), N = lambda.b.size();
 
 	for (int i = 0; i < N; ++i) {
-		double dummy = pow(10, -80);
+		double dummy = MINIMUM_PROBABILITY;
+		for (int j = 0; j < N; ++j) {
+			if (lambda.a[i][j] != 0) {
+				dummy = min(dummy, lambda.a[i][j] / 10);
+			}
+		}
+
+		int count = 0;
+		for (int j = 0; j < N; ++j) {
+			if (lambda.a[i][j] == 0) {
+				lambda.a[i][j] = dummy;
+				count++;
+			}
+		}
+
+		int max_j = 0;
+		for (int j = 0; j < N; ++j) {
+			if (lambda.a[i][j] > lambda.a[i][max_j]) {
+				max_j = j;
+			}
+		}
+		lambda.a[i][max_j] -= count * dummy;
+	}
+
+	for (int i = 0; i < N; ++i) {
+		double dummy = MINIMUM_PROBABILITY;
 		for (int j = 0; j < M; ++j) {
 			if (lambda.b[i][j] != 0) {
 				dummy = min(dummy, lambda.b[i][j] / 10);
@@ -254,17 +382,17 @@ static Model tweak(const Model &old_lambda) {
 Model optimise(const Model &old_lambda, const vector<int> &o) {
 	double old_P_star;
 	int iteration = 0;
-	Model lambda(old_lambda);
-	double P_star = viterbi(old_lambda, o).first;
+	Model lambda = tweak(old_lambda);
+	double P_star = viterbi_logged(lambda, o).first;
 
 	do {
 		iteration += 1;
 		old_P_star = P_star;
 		cout << "Restimate lambda: iteration: " << iteration << ", P* is: " << P_star << endl;
 
-		lambda = tweak(lambda);
 		lambda = restimate(lambda, o);
-		P_star = viterbi(lambda, o).first;
+		lambda = tweak(lambda);
+		P_star = viterbi_logged(lambda, o).first;
 	} while (P_star / old_P_star > OPTIMISE_CONVERGENCE_THRESHOLD && iteration < OPTIMISE_CONVERGENCE_MAX_ITERATIONS);
 
 	return lambda;
