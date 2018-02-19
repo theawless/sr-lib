@@ -1,26 +1,40 @@
 #pragma once
 
+#include <tuple>
 #include <vector>
 
-namespace std {
-	typedef struct {
-		std::vector<std::vector<double>> a;
-		std::vector<std::vector<double>> b;
-		std::vector<double> pi;
-	} Model;
-}
+#include "model.h"
 
-/// Calculates alpha values and P(O|lambda).
-std::pair<double, std::vector<std::vector<double>>> forward(const std::Model &lambda, const std::vector<int> &o);
+class HMM
+{
+private:
+	const double convergence_threshold = 1.001;
+	const double convergence_max_iterations = 50;
+	const double minimum_probability = 10e-60;
+	Model lambda;
 
-/// Calculates alpha values and P(O|lambda).
-std::pair<double, std::vector<std::vector<double>>> forward_scaled(const std::Model &lambda, const std::vector<int> &o);
+	/// Tweak values of lambda.
+	void tweak();
 
-/// Gets the base feed forward model.
-std::Model bakis(int N, int M);
+	/// Calculates P* and optimal states.
+	std::pair<double, std::vector<int>> viterbi(const std::vector<int> &o);
+	std::pair<double, std::vector<int>> viterbi_logged(const std::vector<int> &o);
 
-/// Merges the given models.
-std::Model merge(const std::vector<std::Model>& lambdas);
+	/// Calculates beta values.
+	std::vector<std::vector<double>> backward(const std::vector<int> &o);
+	std::vector<std::vector<double>> backward_scaled(const std::vector<int> &o);
 
-/// Optimises the given model using given observation sequence.
-std::Model optimise(const std::Model &lambda, const std::vector<int> &o);
+	/// Improves Model by using xi and gamma values.
+	void restimate(const std::vector<int> &o);
+
+public:
+	/// Constructor.
+	HMM(const Model &lambda);
+
+	/// Calculates alpha values and P(O|lambda).
+	std::pair<double, std::vector<std::vector<double>>> forward(const std::vector<int> &o);
+	std::pair<double, std::vector<std::vector<double>>> forward_scaled(const std::vector<int> &o);
+
+	/// Optimises the given model using given observation sequence.
+	Model optimise(const std::vector<int> &o);
+};
