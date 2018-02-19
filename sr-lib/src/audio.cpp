@@ -4,68 +4,91 @@
 #include <cmath>
 #include <numeric>
 
-#include "utils.h"
-
-#define SAMPLES_PER_FRAME 320
-#define SAMPLES_WINDOW_OVERLAP 80
-#define NORMALISATION_AMPLITUDE 5000
+#include "maths.h"
 
 using namespace std;
 
-/// Fix DC offset of the signal.
-static vector<double> fix_dc_offset(const vector<double> &amplitudes) {
-	vector<double> vec(amplitudes.size());
+void AudioProcessor::setup_hamming_window()
+{
+	const double pi = 4.0 * atan(1.0);
 
-	double sum_amplitude = accumulate(amplitudes.begin(), amplitudes.end(), 0.0);
-	double mean_amplitude = sum_amplitude / amplitudes.size();
-	for (int i = 0; i < amplitudes.size(); ++i) {
-		vec[i] = amplitudes[i] - mean_amplitude;
+	for (int i = 0; i < samples_per_frame; ++i)
+	{
+		hamming_coefficients[i] = 0.54 - (0.46 * cos((2 * pi * i) / (samples_per_frame - 1)));
 	}
-
-	return vec;
 }
 
-/// Premphasize - boost the higher frequencies.
-static vector<double> preemphasize(const vector<double> &amplitudes) {
-	const double alpha = 0.95;
-	vector<double> vec(amplitudes);
+void AudioProcessor::dc_offset(vector<double> &samples)
+{
+	double sum_amplitude = accumulate(samples.begin(), samples.end(), 0.0);
+	double mean_amplitude = sum_amplitude / samples.size();
 
-	for (int i = 1; i < vec.size(); ++i) {
-		vec[i] -= alpha * amplitudes[i - 1];
+	for (int i = 0; i < samples.size(); ++i)
+	{
+		samples[i] -= mean_amplitude;
 	}
-
-	return vec;
 }
 
-/// Normalise amplitudes of the signal.
-static vector<double> normalise(const vector<double> &amplitudes) {
-	vector<double> vec(amplitudes.size());
+void AudioProcessor::normalise(vector<double> &samples)
+{
+	double max_amplitude = Maths::maximum_absolute(samples);
+	double normalisation_factor = normalisation_value / max_amplitude;
 
-	double max_amplitude = *max_element(amplitudes.begin(), amplitudes.end(), [](double a, double b) {	return abs(a) < abs(b);	});
-	for (int i = 0; i < amplitudes.size(); ++i) {
-		vec[i] = amplitudes[i] * NORMALISATION_AMPLITUDE / max_amplitude;
+	for (int i = 0; i < samples.size(); ++i)
+	{
+		samples[i] *= normalisation_factor;
 	}
-
-	return vec;
 }
 
-vector<double> preprocess(const vector<double> &amplitudes) {
-	vector<double> dc_fixed_amplitudes = fix_dc_offset(amplitudes);
-	vector<double> normalised_amplitudes = normalise(dc_fixed_amplitudes);
-	vector<double> preemphasize_amplitudes = preemphasize(normalised_amplitudes);
-
-	return preemphasize_amplitudes;
+void AudioProcessor::pre_emphasize(vector<double> &samples)
+{
+	for (int i = 1; i < samples.size(); ++i)
+	{
+		samples[i] -= pre_emphasis_factor * samples[i - 1];
+	}
 }
 
-vector<vector<double>> fixed_segment(const vector<double> &amplitudes) {
-	vector<vector<double>> segments;
+void AudioProcessor::hamming_window(vector<double> &frame)
+{
+	for (int i = 0; i < frame.size(); ++i)
+	{
+		frame[i] *= hamming_coefficients[i];
+	}
+}
 
-	for (int i = 0; i <= amplitudes.size() - SAMPLES_PER_FRAME; i += SAMPLES_WINDOW_OVERLAP) {
-		vector<double>::const_iterator left = amplitudes.begin() + i;
-		vector<double>::const_iterator right = left + SAMPLES_PER_FRAME;
+vector<vector<double>> AudioProcessor::framing(const vector<double> &samples)
+{
+	vector<vector<double>> frames;
+
+	for (int i = 0; i <= samples.size() - samples_per_frame; i += samples_window_overlap)
+	{
+		vector<double>::const_iterator left = samples.begin() + i;
+		vector<double>::const_iterator right = left + samples_per_frame;
 		vector<double> frame(left, right);
-		segments.push_back(frame);
+		frames.push_back(frame);
 	}
 
-	return segments;
+	return frames;
+}
+
+AudioProcessor::AudioProcessor(int samples_per_frame, int samples_window_overlap) : samples_per_frame(samples_per_frame),
+samples_window_overlap(samples_window_overlap), hamming_coefficients(vector<double>(samples_per_frame))
+{
+	setup_hamming_window();
+}
+
+vector<vector<double>> AudioProcessor::process(const vector<double> &unprocessed_samples)
+{
+	vector<double> samples(unprocessed_samples);
+
+	dc_offset(samples);
+	normalise(samples);
+	pre_emphasize(samples);
+	vector<vector<double>> frames = framing(samples);
+	for (int i = 0; i < frames.size(); ++i)
+	{
+		hamming_window(frames[i]);
+	}
+
+	return frames;
 }
