@@ -1,25 +1,51 @@
 #pragma once
 
 #include <string>
+#include <sstream>
 #include <vector>
 
-/// Captures the audio for given duration and saves it in the given file.
-void capture_audio(std::string filename, double duration);
+namespace Utils
+{
+	/// Gets the vector from the stream.
+	template <typename T>
+	inline std::vector<T> get_vector_from_stream(std::stringstream &stream, char delimiter);
 
-/// Gets the vector from the given file.
-std::vector<double> get_vector_from_txt(std::string filename);
+	/// Sets the vector to a string form.
+	template <typename T>
+	inline std::string get_string_from_vector(const std::vector<T> &vec, char delimiter);
 
-/// Sets the vector to the given file.
-void set_vector_to_txt(const std::vector<double> &vec, std::string filename);
+	/// Gets the matrix from the stream.
+	template <typename T>
+	inline std::vector<std::vector<T>> get_matrix_from_stream(std::stringstream &stream, char delimiter);
 
-/// Gets the matrix from the given file.
-std::vector<std::vector<double>> get_matrix_from_csv(std::string filename);
+	/// Sets the matrix to a string form.
+	template <typename T>
+	inline std::string get_string_from_matrix(const std::vector<std::vector<T>> &mat, char delimiter);
 
-/// Saves the vector of vectors coefficients to a CSV file.
-void set_matrix_to_csv(const std::vector<std::vector<double>> &mat, std::string filename);
+	/// Gets the item from the given file.
+	template <typename T>
+	inline T get_item_from_file(std::string filename);
 
-/// Divides the given vector into chunks of given size.
-std::vector<std::vector<double>> get_vector_chunks(const std::vector<double> &unchunked, int chunk_size);
+	/// Sets the item to the given file.
+	template <typename T>
+	inline void set_item_to_file(const T &item, std::string filename);
 
-/// Gives a string representation of number with leading zeroes.
-std::string pad_number(int num, int max_num);
+	/// Gets the vector from the given file.
+	template <typename T>
+	inline static std::vector<T> get_vector_from_file(std::string filename);
+
+	/// Sets the vector to the given file.
+	template <typename T>
+	inline static void set_vector_to_file(const std::vector<T> &vec, std::string filename);
+
+	/// Gets the matrix from the given file.
+	template <typename T>
+	inline static std::vector<std::vector<T>> get_matrix_from_file(std::string filename);
+
+	/// Sets the matrix to the given file.
+	template <typename T>
+	inline static void set_matrix_to_file(const std::vector<std::vector<T>> &mat, std::string filename);
+};
+
+// For making template functions work.
+#include "../src/utils.cpp"
