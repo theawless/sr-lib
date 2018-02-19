@@ -1,42 +1,116 @@
 #include "lpcc.h"
 
-#include <algorithm>
+#include <cmath>
 #include <numeric>
-
-#include "maths.h"
-
-#define P_VALUE 12
 
 using namespace std;
 
-static vector<double> frame_to_coefficients(const vector<double>& frame) {
-	vector<double> hamming_frame = hamming_window(frame);
-	vector<double> R = autocorrelation(hamming_frame, 0, P_VALUE);
-	vector<double> A = durbin_solve(R);
-	vector<double> c = cepstral_coefficients(A);
-	vector<double> C = sine_window(c);
+void LPCC::setup_sine_window()
+{
+	const double pi = 4.0 * atan(1.0);
+	sine_coefficients = vector<double>(p, 1);
+
+	for (int i = 0; i < p; ++i)
+	{
+		sine_coefficients[i] += (p / 2.0) * sin((pi * (i + 1)) / p);
+	}
+}
+
+vector<double> LPCC::auto_correlation(const vector<double> &frame, int mi, int mf)
+{
+	vector<double> R(mf + 1 - mi, 0.0);
+
+	for (int i = mi; i < mf + 1; ++i)
+	{
+		for (int j = 0; j < frame.size() - i; ++j)
+		{
+			R[i - mi] += frame[j] * frame[j + i];
+		}
+	}
+
+	return R;
+}
+
+vector<double> LPCC::durbin_solve(const vector<double> R)
+{
+	int p = R.size() - 1;
+	vector<double> E(p + 1, 0.0);
+	vector<vector<double>> a(p + 1, vector<double>(p + 1, 0.0));
+
+	// First iteration.
+	E[0] = R[0];
+	a[1][1] = R[1] / R[0];
+	E[1] = (1 - a[1][1] * a[1][1]) * E[0];
+
+	for (int i = 2; i < p + 1; ++i)
+	{
+		a[i][i] = R[i];
+		for (int j = 1; j < i; ++j)
+		{
+			a[i][i] -= a[i - 1][j] * R[i - j];
+		}
+
+		if (E[i - 1] != 0)
+		{
+			a[i][i] /= E[i - 1];
+		}
+
+		for (int j = 1; j < i; ++j)
+		{
+			a[i][j] = a[i - 1][j] - a[i][i] * a[i - 1][i - j];
+		}
+		E[i] = (1.0 - a[i][i] * a[i][i]) * E[i - 1];
+	}
+
+	return vector<double>(a[p].begin() + 1, a[p].end());
+}
+
+vector<double> LPCC::cepstral_coefficients(const vector<double> &A)
+{
+	vector<double> C(A);
+
+	for (int i = 1; i < A.size(); ++i)
+	{
+		for (int j = 0; j < i; ++j)
+		{
+			C[i] += ((j + 1) * C[j] * A[i - j - 1]) / (i + 1);
+		}
+	}
 
 	return C;
 }
 
-vector<vector<double>> speech_to_coefficients(const vector<vector<double>> &segments) {
-	vector<vector<double>> coefficients;
-
-	for (int i = 0; i < segments.size(); ++i) {
-		vector<double> C = frame_to_coefficients(segments[i]);
-		coefficients.push_back(C);
+void LPCC::sine_window(vector<double> &C)
+{
+	for (int i = 0; i < C.size(); ++i)
+	{
+		C[i] *= sine_coefficients[i];
 	}
-
-	return coefficients;
 }
 
-double coefficients_similarity(const vector<vector<double>> &A, const vector<vector<double>> &B) {
-	double sum_distance = 0;
-	double n_distances = min(A.size(), B.size());
+vector<double> LPCC::lpcc(const vector<double> &frame)
+{
+	vector<double> R = auto_correlation(frame, 0, p);
+	vector<double> A = durbin_solve(R);
+	vector<double> C = cepstral_coefficients(A);
+	sine_window(C);
 
-	for (int i = 0; i < n_distances; ++i) {
-		sum_distance += tokhura_distance(A[i], B[i]);
+	return C;
+}
+
+LPCC::LPCC()
+{
+	setup_sine_window();
+}
+
+vector<vector<double>> LPCC::lpcc(const vector<vector<double>> &frames)
+{
+	vector<vector<double>> lpccs;
+
+	for (int i = 0; i < frames.size(); ++i)
+	{
+		lpccs.push_back(lpcc(frames[i]));
 	}
 
-	return sum_distance / n_distances;
+	return lpccs;
 }
