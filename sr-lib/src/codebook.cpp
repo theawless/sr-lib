@@ -1,60 +1,68 @@
 #include "codebook.h"
 
 #include <iostream>
-#include <vector>
 
 #include "k-means.h"
 
 using namespace std;
 
-/// Finds the initial mean of the universe. This is the first centroid.
-static vector<double> universe_mean(const vector<vector<double>> &universe) {
+vector<double> Codebook::mean(const vector<vector<double>> &universe)
+{
 	vector<double> mean(universe[0].size(), 0.0);
 
-	for (int i = 0; i < universe.size(); ++i) {
-		for (int j = 0; j < universe[0].size(); ++j) {
+	for (int i = 0; i < universe.size(); ++i)
+	{
+		for (int j = 0; j < universe[0].size(); ++j)
+		{
 			mean[j] += universe[i][j];
 		}
 	}
-	for (int i = 0; i < mean.size(); ++i) {
+	for (int i = 0; i < mean.size(); ++i)
+	{
 		mean[i] /= universe.size();
 	}
 
 	return mean;
 }
 
-/// Splits the current centroids into 2 parts.
-static vector<vector<double>> split_centroids(const vector<vector<double>> &old_centroids) {
-	const double epsilon = 0.025;
-	vector<vector<double>> centroids(old_centroids.size() * 2, vector<double>(old_centroids[0].size(), 0.0));
+void Codebook::split()
+{
+	int N = centroids.size();
+	centroids.resize(N * 2, vector<double>(centroids[0].size(), 0.0));
 
-	for (int i = 0; i < old_centroids.size(); ++i) {
-		for (int j = 0; j < old_centroids[0].size(); ++j) {
-			centroids[i][j] = old_centroids[i][j] + epsilon;
-			centroids[old_centroids.size() + i][j] = old_centroids[i][j] - epsilon;
+	for (int i = 0; i < N; ++i)
+	{
+		for (int j = 0; j < centroids[0].size(); ++j)
+		{
+			centroids[N + i][j] = centroids[i][j] - epsilon;
+			centroids[i][j] += epsilon;
 		}
 	}
-
-	return centroids;
 }
 
-vector<vector<double>> lbg_codebook(const vector<vector<double>> &universe, int M) {
-	int m = 1;
-	vector<vector<double>> centroids(1, universe_mean(universe));
+Codebook::Codebook(int M) : M(M)
+{
+}
 
-	do {
+void Codebook::generate(const vector<vector<double>> &universe)
+{
+	int m = 1;
+	KMeans kmeans = KMeans(universe);
+	centroids = vector<vector<double>>(1, mean(universe));
+
+	do
+	{
 		m *= 2;
 		cout << "LBG: m is: " << m << endl;
 
-		centroids = split_centroids(centroids);
-		centroids = optimize(universe, centroids);
+		split();
+		centroids = kmeans.optimize(centroids);
 	} while (m < M);
-
-	return centroids;
 }
 
-vector<int> observation_sequence(const vector<vector<double>> &observations, const vector<vector<double>> &codebook) {
-	vector<vector<double>> distances = distance_matrix(observations, codebook);
+vector<int> Codebook::observations(const vector<vector<double>> &coefficients)
+{
+	pair<double, vector<int>> buckets = KMeans(coefficients).classify(centroids);
 
-	return classify_into_buckets(observations, codebook, distances);
+	return buckets.second;
 }
