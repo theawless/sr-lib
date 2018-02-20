@@ -88,6 +88,11 @@ void LPCC::sine_window(vector<double> &C)
 	}
 }
 
+LPCC::LPCC()
+{
+	setup_sine_window();
+}
+
 vector<double> LPCC::lpcc(const vector<double> &frame)
 {
 	vector<double> R = auto_correlation(frame, 0, p);
@@ -96,21 +101,4 @@ vector<double> LPCC::lpcc(const vector<double> &frame)
 	sine_window(C);
 
 	return C;
-}
-
-LPCC::LPCC()
-{
-	setup_sine_window();
-}
-
-vector<vector<double>> LPCC::lpcc(const vector<vector<double>> &frames)
-{
-	vector<vector<double>> lpccs;
-
-	for (int i = 0; i < frames.size(); ++i)
-	{
-		lpccs.push_back(lpcc(frames[i]));
-	}
-
-	return lpccs;
 }

@@ -57,7 +57,10 @@ private:
 
 		vector<double> samples = Utils::get_vector_from_file<double>(filename + ".txt");
 		vector<vector<double>> frames = audio_processor.process(samples);
-		coefficients = mfcc.mfcc(frames);
+		for (int i = 0; i < frames.size(); ++i)
+		{
+			coefficients.push_back(mfcc.mfcc(frames[i]));
+		}
 		Utils::set_matrix_to_file<double>(coefficients, mfcs_filename);
 
 		return coefficients;
@@ -265,7 +268,7 @@ int main()
 	int n_total_utterances = 15;
 	string folder = "B:/record/digit_0.8_2/";
 	vector<string> audio_names = { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
-	WordRecognizer word_recognizer = WordRecognizer(folder, audio_names, n_total_utterances, n_train_utterances);
+	WordRecognizer word_recognizer(folder, audio_names, n_total_utterances, n_train_utterances);
 
 	pair<vector<int>, vector<int>> results = word_recognizer.test();
 	cout << "n_hits is: " << accumulate(results.first.begin(), results.first.end(), 0) << endl;

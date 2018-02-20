@@ -23,13 +23,10 @@ private:
 	/// Apply sine window.
 	void sine_window(std::vector<double> &C);
 
-	/// LPCC representation of a single frame.
-	std::vector<double> lpcc(const std::vector<double> &frame);
-
 public:
 	/// Constructor.
 	LPCC();
 
-	/// LPCC representation of the frames.
-	std::vector<std::vector<double>> lpcc(const std::vector<std::vector<double>> &frames);
+	/// LPCC representation of a single frame.
+	std::vector<double> lpcc(const std::vector<double> &frame);
 };

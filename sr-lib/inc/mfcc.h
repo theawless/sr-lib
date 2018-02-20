@@ -50,13 +50,10 @@ private:
 	/// Balance the spectrum by subtracting mean.
 	void normalise(std::vector<double> &C);
 
-	/// Find mfcc for given frame.
-	std::vector<double> mfcc(const std::vector<double> &frame);
-
 public:
 	/// Constructor.
 	MFCC();
 
-	/// Find mfcc for given frames.
-	std::vector<std::vector<double>> mfcc(const std::vector<std::vector<double>> &frames);
+	/// Find mfcc for given frame.
+	std::vector<double> mfcc(const std::vector<double> &frame);
 };

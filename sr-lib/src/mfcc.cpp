@@ -127,7 +127,7 @@ vector<complex<double>> MFCC::fft(const vector<complex<double>> &x)
 	// Butterfly computations
 	for (int i = 0; i <= N / 2 - 1; ++i)
 	{
-		complex<double> t = Xjo[i], tw = twiddle[N][i];
+		complex<double> t = Xjo[i], tw = twiddle.at(N).at(i);
 		Xjo[i] = t + tw * Xjo[i + N / 2];
 		Xjo[i + N / 2] = t - tw * Xjo[i + N / 2];
 	}
@@ -187,7 +187,7 @@ vector<double> MFCC::dct(const vector<double> &H)
 
 	for (int i = 0; i <= n_cepstra; ++i)
 	{
-		for (int j = 0; j < n_filters; ++j)
+		for (int j = 0; j < H.size(); ++j)
 		{
 			C[i] += dct_matrix[i][j] * H[j];
 		}
@@ -211,16 +211,4 @@ vector<double> MFCC::mfcc(const vector<double> &frame)
 	normalise(C);
 
 	return C;
-}
-
-vector<vector<double>> MFCC::mfcc(const vector<vector<double>> &frames)
-{
-	vector<vector<double>> mfccs;
-
-	for (int i = 0; i < frames.size(); ++i)
-	{
-		mfccs.push_back(mfcc(frames[i]));
-	}
-
-	return mfccs;
 }
