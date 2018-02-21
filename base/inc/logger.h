@@ -9,7 +9,7 @@
 class Logger
 {
 private:
-	std::vector<std::fstream> log_files;
+	std::vector<std::ofstream> log_files;
 
 public:
 	/// Global logger.
@@ -70,6 +70,6 @@ public:
 	/// Adds log file.
 	inline void add_log(std::string filename)
 	{
-		log_files.push_back(std::fstream(filename, std::ios::out));
+		log_files.push_back(std::ofstream(filename));
 	}
 };

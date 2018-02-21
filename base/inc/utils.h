@@ -1,7 +1,6 @@
 #pragma once
 
 #include <fstream>
-#include <ios>
 #include <limits>
 #include <string>
 #include <sstream>
@@ -82,7 +81,7 @@ namespace Utils
 	template <typename T>
 	inline T get_item_from_file(std::string filename)
 	{
-		std::fstream file(filename, ios::in);
+		std::ifstream file(filename);
 
 		T value;
 		file >> value;
@@ -94,7 +93,7 @@ namespace Utils
 	template <typename T>
 	inline void set_item_to_file(const T &item, std::string filename)
 	{
-		std::fstream file(filename, ios::out);
+		std::ofstream file(filename);
 
 		file << item;
 	}
@@ -103,7 +102,7 @@ namespace Utils
 	template <typename T>
 	inline static std::vector<T> get_vector_from_file(std::string filename)
 	{
-		std::fstream file = fstream(filename, ios::in);
+		std::ifstream file(filename);
 
 		char c;
 		std::stringstream stream;
@@ -120,7 +119,7 @@ namespace Utils
 	template <typename T>
 	inline static void set_vector_to_file(const std::vector<T> &vec, std::string filename)
 	{
-		std::fstream file = fstream(filename, ios::out);
+		std::ofstream file(filename);
 
 		std::string str = get_string_from_vector<T>(vec, '\n');
 		file << str;
@@ -130,7 +129,7 @@ namespace Utils
 	template <typename T>
 	inline static std::vector<std::vector<T>> get_matrix_from_file(std::string filename)
 	{
-		std::fstream file(filename, ios::in);
+		std::ifstream file(filename);
 
 		char c;
 		std::stringstream stream;
@@ -147,7 +146,7 @@ namespace Utils
 	template <typename T>
 	inline static void set_matrix_to_file(const std::vector<std::vector<T>> &mat, std::string filename)
 	{
-		std::fstream file(filename, ios::out);
+		std::ofstream file(filename);
 
 		std::string str = get_string_from_matrix(mat, '\n');
 		file << str;
