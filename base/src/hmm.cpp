@@ -2,7 +2,8 @@
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
+
+#include "logger.h"
 
 using namespace std;
 
@@ -388,7 +389,7 @@ Model HMM::optimise(const vector<int> &o)
 	{
 		iteration += 1;
 		old_P_star = P_star;
-		cout << "Restimate lambda: iteration: " << iteration << ", P* is: " << P_star << endl;
+		Logger::logger() << "Restimate lambda: iteration: " << iteration << ", P* is: " << P_star << endl;
 
 		restimate(o);
 		tweak();

@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 
+/// Thanks to https://github.com/dspavankumar/compute-mfcc
 class MFCC
 {
 private:

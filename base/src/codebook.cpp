@@ -1,8 +1,7 @@
 #include "codebook.h"
 
-#include <iostream>
-
 #include "k-means.h"
+#include "logger.h"
 
 using namespace std;
 
@@ -53,7 +52,7 @@ void Codebook::generate(const vector<vector<double>> &universe)
 	do
 	{
 		m *= 2;
-		cout << "LBG: m is: " << m << endl;
+		Logger::logger() << "LBG: m is: " << m << endl;
 
 		split();
 		centroids = kmeans.optimize(centroids);

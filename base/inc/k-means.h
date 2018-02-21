@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <tuple>
+#include <vector>
 
 class KMeans
 {

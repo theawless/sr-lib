@@ -1,23 +1,17 @@
 #pragma once
 
-#include <vector>
-#include <queue>
-#include <memory>
-#include <thread>
-#include <mutex>
 #include <condition_variable>
-#include <future>
 #include <functional>
+#include <future>
+#include <memory>
+#include <mutex>
 #include <stdexcept>
+#include <thread>
+#include <queue>
+#include <vector>
 
 /// Thanks to https://github.com/progschj/ThreadPool
 class ThreadPool {
-public:
-	ThreadPool(size_t);
-	template<class F, class... Args>
-	std::future<typename std::result_of<F(Args...)>::type> enqueue(F&& f, Args&&... args);
-	~ThreadPool();
-
 private:
 	std::vector<std::thread> workers;
 	std::queue<std::function<void()>> tasks;
@@ -25,6 +19,17 @@ private:
 	bool stop;
 	std::mutex queue_mutex;
 	std::condition_variable condition;
+
+public:
+	/// Constructor.
+	inline ThreadPool(size_t);
+
+	/// Enqueue task and get future.
+	template<class F, class... Args>
+	inline std::future<typename std::result_of<F(Args...)>::type> enqueue(F&& f, Args&&... args);
+
+	/// Join all threads.
+	inline ~ThreadPool();
 };
 
 ThreadPool::ThreadPool(size_t threads) : stop(false)
@@ -55,6 +60,19 @@ ThreadPool::ThreadPool(size_t threads) : stop(false)
 	}
 }
 
+ThreadPool::~ThreadPool()
+{
+	{
+		std::unique_lock<std::mutex> lock(queue_mutex);
+		stop = true;
+	}
+	condition.notify_all();
+	for (std::thread &worker : workers)
+	{
+		worker.join();
+	}
+}
+
 template<class F, class... Args>
 std::future<typename std::result_of<F(Args...)>::type> ThreadPool::enqueue(F&& f, Args&&... args)
 {
@@ -74,17 +92,4 @@ std::future<typename std::result_of<F(Args...)>::type> ThreadPool::enqueue(F&& f
 	condition.notify_one();
 
 	return res;
-}
-
-ThreadPool::~ThreadPool()
-{
-	{
-		std::unique_lock<std::mutex> lock(queue_mutex);
-		stop = true;
-	}
-	condition.notify_all();
-	for (std::thread &worker : workers)
-	{
-		worker.join();
-	}
 }

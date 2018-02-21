@@ -1,8 +1,8 @@
 #include "k-means.h"
 
 #include <limits>
-#include <iostream>
 
+#include "logger.h"
 #include "maths.h"
 
 using namespace std;
@@ -68,7 +68,7 @@ vector<vector<double>> KMeans::optimize(const std::vector<std::vector<double>> &
 	{
 		buckets = new_buckets;
 		iteration += 1;
-		cout << "Kmeans: iteration: " << iteration << ", distortion is: " << buckets.first << endl;
+		Logger::logger() << "Kmeans: iteration: " << iteration << ", distortion is: " << buckets.first << endl;
 
 		relocate(buckets.second, centroids);
 		new_buckets = classify(centroids);

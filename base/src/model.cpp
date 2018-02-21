@@ -112,12 +112,12 @@ istream &operator>>(istream &input, Model &model)
 
 ostream &operator<<(ostream &output, const Model &model)
 {
-	output << "pi" << endl;
-	output << Utils::get_string_from_vector<double>(model.pi, ',') << endl;
-	output << "a" << endl;
-	output << Utils::get_string_from_matrix<double>(model.a, '\n') << endl;
-	output << "b" << endl;
-	output << Utils::get_string_from_matrix<double>(model.b, '\n') << endl;
+	output << "pi" << '\n';
+	output << Utils::get_string_from_vector<double>(model.pi, ',') << '\n';
+	output << "a" << '\n';
+	output << Utils::get_string_from_matrix<double>(model.a, '\n') << '\n';
+	output << "b" << '\n';
+	output << Utils::get_string_from_matrix<double>(model.b, '\n') << '\n';
 
 	return output;
 }
