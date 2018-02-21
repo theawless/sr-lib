@@ -12,7 +12,7 @@
 
 using namespace std;
 
-vector<vector<double>> Recognizer::get_coefficients(string filename, bool cache = true)
+vector<vector<double>> Recognizer::get_coefficients(string filename, bool cache)
 {
 	vector<vector<double>> coefficients;
 	string mfcs_filename = filename + ".mfcs";
@@ -88,7 +88,7 @@ void Recognizer::build_codebook()
 	Utils::set_matrix_to_file<double>(codebook.centroids, codebook_filename);
 }
 
-vector<int> Recognizer::get_observations(string filename, bool cache = true)
+vector<int> Recognizer::get_observations(string filename, bool cache)
 {
 	vector<int> observations;
 	string obs_filename = filename + ".obs";
@@ -208,20 +208,17 @@ int Recognizer::decide_word(const vector<int> &observations)
 }
 
 Recognizer::Recognizer(const Config &config) :config(config), audio_processor(AudioProcessor(320, 80)),
-mfcc(MFCC()), codebook(Codebook(config.M)), thread_pool(4 * thread::hardware_concurrency())
+mfcc(MFCC()), codebook(Codebook(config.M)), thread_pool(config.n_thread * thread::hardware_concurrency())
 {
 	Logger::logger().add_log(config.folder + "recognizer.log");
-}
 
-void Recognizer::setup()
-{
 	build_codebook();
 	build_models();
 }
 
-int Recognizer::recognize(string filename)
+int Recognizer::recognize(string filename, bool cache)
 {
-	vector<int> observations = get_observations(config.folder + filename, false);
+	vector<int> observations = get_observations(config.folder + filename, cache);
 	int word_index = decide_word(observations);
 
 	return word_index;

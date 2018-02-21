@@ -12,14 +12,14 @@ class Recognizer
 {
 private:
 	Config config;
-	std::vector<Model> models;
 	AudioProcessor audio_processor;
 	MFCC mfcc;
 	Codebook codebook;
+	std::vector<Model> models;
 	ThreadPool thread_pool;
 
 	/// Loads, preprocesses the amplitudes and then returns their lpc coefficients.
-	std::vector<std::vector<double>> get_coefficients(std::string filename, bool cache);
+	std::vector<std::vector<double>> get_coefficients(std::string filename, bool cache=true);
 
 	/// Builds the universe by accumulation lpcs of all frames of all signals.
 	std::vector<std::vector<double>> get_universe();
@@ -28,7 +28,7 @@ private:
 	void build_codebook();
 
 	/// Gets the observations sequence from the codebook.
-	std::vector<int> get_observations(std::string filename, bool cache);
+	std::vector<int> get_observations(std::string filename, bool cach=true);
 
 	/// Optimises the given train model use the observations of the given filename.
 	Model get_utterance_model(const Model &train_model, int word_index, int train_index, int utterance_index);
@@ -46,9 +46,6 @@ public:
 	/// Constructor.
 	Recognizer(const Config &config);
 
-	/// Build models and stuff.
-	void setup();
-
 	/// Recognizes the word.
-	int recognize(std::string filename);
+	int recognize(std::string filename, bool cache=false);
 };
