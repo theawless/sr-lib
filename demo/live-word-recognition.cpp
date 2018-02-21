@@ -10,9 +10,9 @@ using namespace std;
 
 int main()
 {
-	Config config("word.config", "B:/record/digit_0.8_2/");
+	Config config("B:\\record\\digit_0.8_2\\");
+	config.load("word.config");
 	Recognizer recognizer(config);
-	recognizer.setup();
 
 	double duration = 0.8;
 	string test_filename = "test";

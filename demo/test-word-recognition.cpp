@@ -11,13 +11,10 @@ using namespace std;
 
 int main()
 {
-	Config config;
-	config.folder = "B:/record/digit_0.8_2/";
+	Config config("B:\\record\\digit_0.8_2\\");
 	config.audio_names = { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
 	config.n_utterances = vector<int>(config.audio_names.size(), 10);
-
 	Recognizer recognizer(config);
-	recognizer.setup();
 
 	int n_total_utterances = 16;
 	vector<int> n_hits(config.audio_names.size(), 0), n_errs(config.audio_names.size(), 0);
@@ -26,7 +23,7 @@ int main()
 		for (int j = config.n_utterances[i]; j < n_total_utterances; ++j)
 		{
 			string test_filename = config.audio_names[i] + "_" + to_string(j);
-			int word_index = recognizer.recognize(test_filename);
+			int word_index = recognizer.recognize(test_filename, true);
 
 			if (word_index == i)
 			{
