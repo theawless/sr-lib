@@ -61,10 +61,7 @@ vector<vector<double>> Recognizer::get_universe()
 		{
 			string filename = config.folder + config.audio_names[i] + "_" + to_string(j);
 			vector<vector<double>> coefficients = get_coefficients(filename);
-			for (int i = 0; i < coefficients.size(); ++i)
-			{
-				universe.push_back(coefficients[i]);
-			}
+			universe.insert(universe.end(), coefficients.begin(), coefficients.end());
 		}
 	}
 	Utils::set_matrix_to_file(universe, universe_filename);

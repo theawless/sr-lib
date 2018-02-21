@@ -31,8 +31,8 @@ namespace Utils
 	{
 		std::stringstream stream;
 		// maximise precision
-		stream.precision(numeric_limits<double>::max_digits10);
-		stream.setf(ios::scientific);
+		stream.precision(std::numeric_limits<double>::max_digits10);
+		stream.setf(std::ios::scientific);
 
 		for (int i = 0; i < vec.size() - 1; ++i)
 		{
@@ -52,7 +52,8 @@ namespace Utils
 		std::string line;
 		while (getline(stream, line, delimiter))
 		{
-			std::vector<T> vec = get_vector_from_stream<T>(std::stringstream(line), ',');
+			std::stringstream line_stream(line);
+			std::vector<T> vec = get_vector_from_stream<T>(line_stream, ',');
 			mat.push_back(vec);
 		}
 

@@ -16,7 +16,7 @@ Recorder::Recorder(string folder, string sox_path) : folder(folder), sox_path(so
 
 void Recorder::record(string filename, double duration)
 {
-	string data_filename = folder + filename + ".wav";
+	string data_filename = folder + filename + ".audio";
 	string recording_filename = folder + filename + ".samples";
 
 	string base_command = '"' + sox_path + '"' + " -t waveaudio -c 1 -r " + to_string(sample_rate) + " -d -t s16 -q ";

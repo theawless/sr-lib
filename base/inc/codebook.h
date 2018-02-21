@@ -9,10 +9,10 @@ private:
 	const double epsilon = 0.025;
 
 	/// Finds the initial mean of the universe. This is the first centroid.
-	std::vector<double> Codebook::mean(const std::vector<std::vector<double>> &universe);
+	std::vector<double> mean(const std::vector<std::vector<double>> &universe);
 
 	/// Splits the current centroids into 2 parts.
-	void Codebook::split();
+	void split();
 
 public:
 	std::vector<std::vector<double>> centroids;
