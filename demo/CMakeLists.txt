@@ -1,9 +1,7 @@
-include_directories(${SR_LIB_SOURCE_DIR}/sr-lib/inc)
+include_directories(${SR_LIB_SOURCE_DIR}/word/inc)
 
-add_executable(Recorder src/recorder.cpp)
-add_executable(WordRecognizer src/word-recognizer.cpp)
-add_executable(WordRecognizerParallel src/word-recognizer-parallel.cpp)
+add_executable(LiveWordRecognition live-word-recognition.cpp)
+add_executable(TestWordRecognition Test-word-recognition.cpp)
 
-target_link_libraries(Recorder sr-lib)
-target_link_libraries(WordRecognizer sr-lib)
-target_link_libraries(WordRecognizerParallel sr-lib)
+target_link_libraries(LiveWordRecognition word)
+target_link_libraries(TestWordRecognition word)
