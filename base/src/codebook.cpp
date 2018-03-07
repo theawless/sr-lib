@@ -52,7 +52,7 @@ void Codebook::generate(const vector<vector<double>> &universe)
 	do
 	{
 		m *= 2;
-		Logger::logger() << "LBG: m is: " << m << endl;
+		Logger::logger().log("LBG: m is:", m);
 
 		split();
 		centroids = kmeans.optimize(centroids);

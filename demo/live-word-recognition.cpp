@@ -29,7 +29,7 @@ public:
 
 		string base_command = '"' + sox_path + '"' + " -t waveaudio -c 1 -r " + to_string(sample_rate) + " -d -t s16 -q ";
 		string full_command = base_command + data_filename + " trim 0 " + to_string(duration);
-		Logger::logger() << "Recording started, duration: " << duration << endl;
+		Logger::logger().log("Recording started, duration:", duration);
 		system(full_command.c_str());
 
 		fstream data(data_filename, ios::in | ios::binary);
@@ -51,7 +51,7 @@ int main()
 	Recorder recorder(config.folder, "C:\\Program Files (x86)\\sox-14-4-2\\sox.exe");
 
 	string ready;
-	while (Logger::logger() << "Are you ready to speak? (y/n) ", cin >> ready)
+	while (Logger::logger().log("Are you ready to speak? (y/n)"), cin >> ready)
 	{
 		if (ready != "Y" && ready != "y")
 		{
@@ -61,6 +61,6 @@ int main()
 		recorder.record(test_filename, duration);
 
 		int word_index = tester.test(test_filename);
-		Logger::logger() << "The recognised word is: " << config.audio_names[word_index] << endl;
+		Logger::logger().log("The recognised word is:", config.audio_names[word_index]);
 	}
 }

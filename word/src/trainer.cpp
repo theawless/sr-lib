@@ -16,7 +16,7 @@ vector<vector<double>> Trainer::get_coefficients(string filename)
 {
 	vector<vector<double>> coefficients;
 	string coeffs_filename = filename + ".coeffs";
-	Logger::logger() << "Getting " << coeffs_filename << endl;
+	Logger::logger().log("Getting", coeffs_filename);
 
 	coefficients = Utils::get_matrix_from_file<double>(coeffs_filename);
 	if (!coefficients.empty())
@@ -39,7 +39,7 @@ vector<vector<double>> Trainer::get_universe()
 {
 	vector<vector<double>> universe;
 	const string universe_filename = config.folder + "coeff.universe";
-	Logger::logger() << "Getting " << universe_filename << endl;
+	Logger::logger().log("Getting", universe_filename);
 
 	universe = Utils::get_matrix_from_file<double>(universe_filename);
 	if (!universe.empty())
@@ -69,7 +69,7 @@ vector<vector<double>> Trainer::get_universe()
 void Trainer::build_codebook()
 {
 	const string codebook_filename = config.folder + "coeff.codebook";
-	Logger::logger() << "Getting " << codebook_filename << endl;
+	Logger::logger().log("Getting", codebook_filename);
 
 	codebook.centroids = Utils::get_matrix_from_file<double>(codebook_filename);
 	if (!codebook.centroids.empty())
@@ -86,7 +86,7 @@ vector<int> Trainer::get_observations(string filename)
 {
 	vector<int> observations;
 	string obs_filename = filename + ".obs";
-	Logger::logger() << "Getting " << obs_filename << endl;
+	Logger::logger().log("Getting", obs_filename);
 
 	observations = Utils::get_vector_from_file<int>(obs_filename);
 	if (!observations.empty())
@@ -107,7 +107,7 @@ Model Trainer::get_utterance_model(const Model &train_model, int word_index, int
 	string model_ext = ".model";
 	string filename = config.folder + config.audio_names[word_index] + "_" + to_string(utterance_index);
 	string model_filename = filename + model_ext + "_" + to_string(train_index);
-	Logger::logger() << "Getting " << model_filename << endl;
+	Logger::logger().log("Getting", model_filename);
 
 	model = Utils::get_item_from_file<Model>(model_filename);
 	if (!model.empty())
@@ -128,7 +128,7 @@ Model Trainer::get_word_model(const Model &train_model, int word_index, int trai
 	string model_ext = ".model";
 	string filename = config.folder + config.audio_names[word_index];
 	string model_filename = filename + model_ext + "_" + to_string(train_index);
-	Logger::logger() << "Getting " << model_filename << endl;
+	Logger::logger().log("Getting", model_filename);
 
 	model = Utils::get_item_from_file<Model>(model_filename);
 	if (!model.empty())
@@ -160,7 +160,7 @@ void Trainer::build_models()
 		string model_ext = ".model";
 		string filename = config.folder + config.audio_names[i];
 		string model_filename = filename + model_ext;
-		Logger::logger() << "Getting " << model_filename << endl;
+		Logger::logger().log("Getting", model_filename);
 
 		model = Utils::get_item_from_file<Model>(model_filename);
 		if (!model.empty())

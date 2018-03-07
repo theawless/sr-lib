@@ -36,10 +36,10 @@ int main()
 				n_errs[i]++;
 				continue;
 			}
-			Logger::logger() << "The recognised word is: " << config.audio_names[word_index] << endl;
+			Logger::logger().log("The recognised word is:", config.audio_names[word_index]);
 		}
 	}
 
-	Logger::logger() << "n_hits is: " << accumulate(n_hits.begin(), n_hits.end(), 0) << endl;
-	Logger::logger() << "n_errs is: " << accumulate(n_errs.begin(), n_errs.end(), 0) << endl;
+	Logger::logger().log("n_hits is:", accumulate(n_hits.begin(), n_hits.end(), 0));
+	Logger::logger().log("n_errs is:", accumulate(n_errs.begin(), n_errs.end(), 0));
 }
