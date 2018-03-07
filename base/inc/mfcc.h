@@ -56,5 +56,5 @@ public:
 	MFCC();
 
 	/// Find mfcc for given frame.
-	std::vector<double> mfcc(const std::vector<double> &frame);
+	std::vector<double> coeffs(const std::vector<double> &frame);
 };

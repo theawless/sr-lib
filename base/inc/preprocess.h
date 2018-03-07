@@ -2,7 +2,7 @@
 
 #include <vector>
 
-class AudioProcessor
+class Preprocessor
 {
 private:
 	const int samples_per_frame;
@@ -31,7 +31,7 @@ private:
 
 public:
 	/// Constructor.
-	AudioProcessor(int samples_per_frame, int samples_window_overlap);
+	Preprocessor(int samples_per_frame, int samples_window_overlap);
 
 	/// Process the samples and return frames.
 	std::vector<std::vector<double>> process(const std::vector<double> &samples);

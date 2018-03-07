@@ -5,7 +5,7 @@
 class LPCC
 {
 private:
-	const int p = 12;
+	const int n_cepstra = 12;
 	std::vector<double> sine_coefficients;
 
 	/// Compute sine coefficients
@@ -28,5 +28,5 @@ public:
 	LPCC();
 
 	/// LPCC representation of a single frame.
-	std::vector<double> lpcc(const std::vector<double> &frame);
+	std::vector<double> coeffs(const std::vector<double> &frame);
 };

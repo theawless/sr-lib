@@ -1,4 +1,4 @@
-#include "audio.h"
+#include "preprocess.h"
 
 #include <algorithm>
 #include <cmath>
@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void AudioProcessor::setup_hamming_window()
+void Preprocessor::setup_hamming_window()
 {
 	const double pi = 4.0 * atan(1.0);
 
@@ -18,7 +18,7 @@ void AudioProcessor::setup_hamming_window()
 	}
 }
 
-void AudioProcessor::dc_offset(vector<double> &samples)
+void Preprocessor::dc_offset(vector<double> &samples)
 {
 	double sum_amplitude = accumulate(samples.begin(), samples.end(), 0.0);
 	double mean_amplitude = sum_amplitude / samples.size();
@@ -29,7 +29,7 @@ void AudioProcessor::dc_offset(vector<double> &samples)
 	}
 }
 
-void AudioProcessor::normalise(vector<double> &samples)
+void Preprocessor::normalise(vector<double> &samples)
 {
 	double max_amplitude = Maths::maximum_absolute(samples);
 	double normalisation_factor = normalisation_value / max_amplitude;
@@ -40,7 +40,7 @@ void AudioProcessor::normalise(vector<double> &samples)
 	}
 }
 
-void AudioProcessor::pre_emphasize(vector<double> &samples)
+void Preprocessor::pre_emphasize(vector<double> &samples)
 {
 	for (int i = 1; i < samples.size(); ++i)
 	{
@@ -48,7 +48,7 @@ void AudioProcessor::pre_emphasize(vector<double> &samples)
 	}
 }
 
-void AudioProcessor::hamming_window(vector<double> &frame)
+void Preprocessor::hamming_window(vector<double> &frame)
 {
 	for (int i = 0; i < frame.size(); ++i)
 	{
@@ -56,7 +56,7 @@ void AudioProcessor::hamming_window(vector<double> &frame)
 	}
 }
 
-vector<vector<double>> AudioProcessor::framing(const vector<double> &samples)
+vector<vector<double>> Preprocessor::framing(const vector<double> &samples)
 {
 	vector<vector<double>> frames;
 
@@ -71,13 +71,13 @@ vector<vector<double>> AudioProcessor::framing(const vector<double> &samples)
 	return frames;
 }
 
-AudioProcessor::AudioProcessor(int samples_per_frame, int samples_window_overlap) : samples_per_frame(samples_per_frame),
-samples_window_overlap(samples_window_overlap), hamming_coefficients(vector<double>(samples_per_frame))
+Preprocessor::Preprocessor(int samples_per_frame, int samples_window_overlap) : samples_per_frame(samples_per_frame),
+samples_window_overlap(samples_window_overlap), hamming_coefficients(samples_per_frame)
 {
 	setup_hamming_window();
 }
 
-vector<vector<double>> AudioProcessor::process(const vector<double> &unprocessed_samples)
+vector<vector<double>> Preprocessor::process(const vector<double> &unprocessed_samples)
 {
 	vector<double> samples(unprocessed_samples);
 

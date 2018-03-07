@@ -1,4 +1,4 @@
-#include <mfcc.h>
+#include "mfcc.h"
 
 #include <algorithm>
 #include <cmath>
@@ -34,14 +34,14 @@ void MFCC::setup_filterbank()
 	double low_mel = hertz2mel(hz_low);
 	double high_mel = hertz2mel(hz_high);
 
-	// Calculate filter centre-frequencies
+	// calculate filter centre-frequencies
 	vector<double> hz_filter_center(n_filters + 2, 0.0);
 	for (int i = 0; i < n_filters + 2; ++i)
 	{
 		hz_filter_center[i] = mel2hertz(low_mel + (high_mel - low_mel) / (n_filters + 1) * i);
 	}
 
-	// Calculate FFT bin frequencies
+	// calculate FFT bin frequencies
 	vector<double> hz_fft_bin(n_fft_bins, 0.0);
 	for (int i = 0; i < n_fft_bins; ++i)
 	{
@@ -109,7 +109,7 @@ vector<complex<double>> MFCC::fft(const vector<complex<double>> &x)
 	}
 	vector<complex<double>> xe(N / 2, 0.0), xo(N / 2, 0.0), Xjo, Xjo2;
 
-	// Construct arrays from even and odd indices
+	// construct arrays from even and odd indices
 	for (int i = 0; i < N; i += 2)
 	{
 		xe[i / 2] = x[i];
@@ -119,12 +119,12 @@ vector<complex<double>> MFCC::fft(const vector<complex<double>> &x)
 		xo[(i - 1) / 2] = x[i];
 	}
 
-	// Compute N/2-point FFT
+	// compute N/2-point FFT
 	Xjo = fft(xe);
 	Xjo2 = fft(xo);
 	Xjo.insert(Xjo.end(), Xjo2.begin(), Xjo2.end());
 
-	// Butterfly computations
+	// butterfly computations
 	for (int i = 0; i <= N / 2 - 1; ++i)
 	{
 		complex<double> t = Xjo[i], tw = twiddle.at(N).at(i);
@@ -203,7 +203,7 @@ MFCC::MFCC()
 	setup_dct();
 }
 
-vector<double> MFCC::mfcc(const vector<double> &frame)
+vector<double> MFCC::coeffs(const vector<double> &frame)
 {
 	vector<double> P = power_spectrum(frame);
 	vector<double> H = lmfb(P);

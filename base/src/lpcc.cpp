@@ -8,11 +8,11 @@ using namespace std;
 void LPCC::setup_sine_window()
 {
 	const double pi = 4.0 * atan(1.0);
-	sine_coefficients = vector<double>(p, 1);
+	sine_coefficients = vector<double>(n_cepstra, 1);
 
-	for (int i = 0; i < p; ++i)
+	for (int i = 0; i < n_cepstra; ++i)
 	{
-		sine_coefficients[i] += (p / 2.0) * sin((pi * (i + 1)) / p);
+		sine_coefficients[i] += (n_cepstra / 2.0) * sin((pi * (i + 1)) / n_cepstra);
 	}
 }
 
@@ -93,9 +93,9 @@ LPCC::LPCC()
 	setup_sine_window();
 }
 
-vector<double> LPCC::lpcc(const vector<double> &frame)
+vector<double> LPCC::coeffs(const vector<double> &frame)
 {
-	vector<double> R = auto_correlation(frame, 0, p);
+	vector<double> R = auto_correlation(frame, 0, n_cepstra);
 	vector<double> A = durbin_solve(R);
 	vector<double> C = cepstral_coefficients(A);
 	sine_window(C);
