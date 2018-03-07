@@ -32,7 +32,7 @@ public:
 		for (int i = 0; i < mat.size(); ++i)
 		{
 			audio_names.push_back(mat[i][0]);
-			n_utterances.push_back(std::stod(mat[i][1]));
+			n_utterances.push_back(std::stoi(mat[i][1]));
 		}
 	}
 
