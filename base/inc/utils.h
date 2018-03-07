@@ -10,7 +10,7 @@ namespace Utils
 {
 	/// Gets the vector from the stream.
 	template <typename T>
-	inline std::vector<T> get_vector_from_stream(std::stringstream &stream, char delimiter)
+	inline std::vector<T> get_vector_from_stream(std::istream &stream, char delimiter)
 	{
 		std::vector<T> vec;
 
@@ -45,7 +45,7 @@ namespace Utils
 
 	/// Gets the matrix from the stream.
 	template <typename T>
-	inline std::vector<std::vector<T>> get_matrix_from_stream(std::stringstream &stream, char delimiter)
+	inline std::vector<std::vector<T>> get_matrix_from_stream(std::istream &stream, char delimiter)
 	{
 		std::vector<std::vector<T>> mat;
 
@@ -101,16 +101,9 @@ namespace Utils
 
 	/// Gets the vector from the given file.
 	template <typename T>
-	inline static std::vector<T> get_vector_from_file(std::string filename)
+	inline std::vector<T> get_vector_from_file(std::string filename)
 	{
-		std::ifstream file(filename);
-
-		char c;
-		std::stringstream stream;
-		while (file.get(c))
-		{
-			stream << c;
-		}
+		std::ifstream stream(filename);
 		std::vector<T> vec = get_vector_from_stream<T>(stream, '\n');
 
 		return vec;
@@ -118,7 +111,7 @@ namespace Utils
 
 	/// Sets the vector to the given file.
 	template <typename T>
-	inline static void set_vector_to_file(const std::vector<T> &vec, std::string filename)
+	inline void set_vector_to_file(const std::vector<T> &vec, std::string filename)
 	{
 		std::ofstream file(filename);
 
@@ -128,16 +121,9 @@ namespace Utils
 
 	/// Gets the matrix from the given file.
 	template <typename T>
-	inline static std::vector<std::vector<T>> get_matrix_from_file(std::string filename)
+	inline std::vector<std::vector<T>> get_matrix_from_file(std::string filename)
 	{
-		std::ifstream file(filename);
-
-		char c;
-		std::stringstream stream;
-		while (file.get(c))
-		{
-			stream << c;
-		}
+		std::ifstream stream(filename);
 		std::vector<std::vector<T>> mat = get_matrix_from_stream<T>(stream, '\n');
 
 		return mat;
@@ -145,7 +131,7 @@ namespace Utils
 
 	/// Sets the matrix to the given file.
 	template <typename T>
-	inline static void set_matrix_to_file(const std::vector<std::vector<T>> &mat, std::string filename)
+	inline void set_matrix_to_file(const std::vector<std::vector<T>> &mat, std::string filename)
 	{
 		std::ofstream file(filename);
 
