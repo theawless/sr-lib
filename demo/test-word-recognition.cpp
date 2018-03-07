@@ -34,9 +34,8 @@ int main()
 			if (word_index == -1)
 			{
 				n_errs[i]++;
-				continue;
 			}
-			Logger::logger().log("The recognised word is:", config.audio_names[word_index]);
+			Logger::logger().log("The recognised word is:", word_index == -1 ? "###" : config.audio_names[word_index]);
 		}
 	}
 

@@ -9,6 +9,7 @@
 #include "hmm.h"
 #include "logger.h"
 #include "utils.h"
+#include "wav.h"
 
 using namespace std;
 
@@ -24,8 +25,8 @@ vector<vector<double>> Trainer::get_coefficients(string filename)
 		return coefficients;
 	}
 
-	vector<double> samples = Utils::get_vector_from_file<double>(filename + ".samples");
-	vector<vector<double>> frames = preprocessor.process(samples);
+	Wav wav_file(filename + ".wav");
+	vector<vector<double>> frames = preprocessor.process(wav_file.get_samples<double>());
 	for (int i = 0; i < frames.size(); ++i)
 	{
 		coefficients.push_back(mfcc.coeffs(frames[i]));

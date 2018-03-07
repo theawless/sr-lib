@@ -9,6 +9,7 @@
 #include "hmm.h"
 #include "logger.h"
 #include "utils.h"
+#include "wav.h"
 
 using namespace std;
 
@@ -18,8 +19,8 @@ vector<vector<double>> Tester::get_coefficients(string filename)
 	string coeffs_filename = filename + ".coeffs";
 	Logger::logger().log("Getting", coeffs_filename);
 
-	vector<double> samples = Utils::get_vector_from_file<double>(filename + ".samples");
-	vector<vector<double>> frames = preprocessor.process(samples);
+	Wav wav_file(filename + ".wav");
+	vector<vector<double>> frames = preprocessor.process(wav_file.get_samples<double>());
 	vector<future<vector<double>>> coefficients_futures;
 	for (int i = 0; i < frames.size(); ++i)
 	{
