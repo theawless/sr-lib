@@ -3,72 +3,53 @@
 #include <fstream>
 #include <ios>
 #include <iostream>
+#include <string>
+#include <sstream>
 #include <vector>
 
 /// Thanks to https://stackoverflow.com/questions/13978480/using-freopen-to-print-to-file-and-screen/13978705
+/// Thanks to https://stackoverflow.com/questions/27375089/what-is-the-easiest-way-to-print-a-variadic-parameter-pack-using-stdostream
 class Logger
 {
 private:
 	std::vector<std::ofstream> log_files;
 
+	template <typename Arg, typename... Args>
+	void unpack(std::ostream& out, Arg&& arg, Args&&... args)
+	{
+		out << std::forward<Arg>(arg);
+		using expander = int[];
+		(void)expander
+		{
+			0, (void(out << ' ' << std::forward<Args>(args)), 0)...
+		};
+	}
+
 public:
 	/// Global logger.
-	inline static Logger& logger()
+	static Logger &logger()
 	{
 		static Logger instance;
 
 		return instance;
 	}
 
-	/// Operator implementation.
-	template<typename T>
-	inline Logger& operator<<(const T& obj)
+	template<typename... Args>
+	inline void log(Args... args)
 	{
-		std::cout << obj;
+		std::stringstream stream;
+		unpack(stream, args...);
+		std::string message = stream.str() + '\n';
+
+		std::cout << message;
 		for (int i = 0; i < log_files.size(); ++i)
 		{
-			log_files[i] << obj;
+			log_files[i] << message;
 		}
-
-		return *this;
-	}
-
-	inline Logger& operator<<(std::ios_base& (*func)(std::ios_base&))
-	{
-		std::cout << func;
-		for (int i = 0; i < log_files.size(); ++i)
-		{
-			log_files[i] << func;
-		}
-
-		return *this;
-	}
-
-	template<typename CharT, typename Traits>
-	inline Logger& operator<<(std::basic_ios<CharT, Traits>& (*func)(std::basic_ios<CharT, Traits>&))
-	{
-		std::cout << func;
-		for (int i = 0; i < log_files.size(); ++i)
-		{
-			log_files[i] << func;
-		}
-
-		return *this;
-	}
-
-	inline Logger& operator<<(std::ostream& (*func)(std::ostream&))
-	{
-		std::cout << func;
-		for (int i = 0; i < log_files.size(); ++i)
-		{
-			log_files[i] << func;
-		}
-
-		return *this;
 	}
 
 	/// Adds log file.
-	inline void add_log(std::string filename)
+	void add_log(std::string filename)
 	{
 		log_files.push_back(std::ofstream(filename));
 	}
