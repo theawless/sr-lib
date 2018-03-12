@@ -22,7 +22,7 @@ private:
 
 public:
 	/// Constructor.
-	ThreadPool(int n_threads)
+	inline ThreadPool(int n_threads)
 	{
 		for (int i = 0; i < n_threads; ++i)
 		{
@@ -69,7 +69,7 @@ public:
 	}
 
 	/// Join all threads.
-	~ThreadPool()
+	inline ~ThreadPool()
 	{
 		{
 			std::unique_lock<std::mutex> lock(queue_mutex);

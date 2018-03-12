@@ -33,7 +33,7 @@ private:
 
 public:
 	/// Constructor.
-	Wav(std::string filename)
+	inline Wav(std::string filename)
 	{
 		std::ifstream file(filename, std::ios::binary);
 
@@ -71,7 +71,7 @@ public:
 	}
 
 	/// Gets the sample rate.
-	int get_sample_rate()
+	inline int get_sample_rate()
 	{
 		return sample_rate;
 	}
