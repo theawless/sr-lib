@@ -28,7 +28,7 @@ public:
 
 		string base_command = '"' + sox_path + '"' + " -t waveaudio -c 1 -r " + to_string(sample_rate) + " -d -q -L ";
 		string full_command = base_command + wav_filename + " trim 0 " + to_string(duration);
-		Logger::logger().log("Recording started, duration:", duration);
+		Logger::log("Recording started, duration:", duration);
 		system(full_command.c_str());
 	}
 };
@@ -36,7 +36,7 @@ public:
 int main()
 {
 	Config config("B:\\record\\digit_0.8_2\\");
-	config.load("word.config");
+	config.load("sr-lib.config");
 	Trainer trainer(config);
 	Tester tester(config);
 
@@ -45,7 +45,7 @@ int main()
 	Recorder recorder(config.folder, "C:\\Program Files (x86)\\sox-14-4-2\\sox.exe");
 
 	string ready;
-	while (Logger::logger().log("Are you ready to speak? (y/n)"), cin >> ready)
+	while (Logger::log("Are you ready to speak? (y/n)"), cin >> ready)
 	{
 		if (ready != "Y" && ready != "y")
 		{
@@ -55,6 +55,6 @@ int main()
 		recorder.record(test_filename, duration);
 
 		int word_index = tester.test(test_filename);
-		Logger::logger().log("The recognised word is:", word_index == -1 ? "###" : config.audio_names[word_index]);
+		Logger::log("The recognised word is:", word_index == -1 ? "###" : config.audio_names[word_index]);
 	}
 }

@@ -68,7 +68,7 @@ vector<vector<double>> KMeans::optimize(const std::vector<std::vector<double>> &
 	{
 		buckets = new_buckets;
 		iteration += 1;
-		Logger::logger().log("Kmeans: iteration:", iteration, ", distortion is:", buckets.first);
+		Logger::log("Kmeans: iteration:", iteration, ", distortion is:", buckets.first);
 
 		relocate(buckets.second, centroids);
 		new_buckets = classify(centroids);

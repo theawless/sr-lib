@@ -389,7 +389,7 @@ Model HMM::optimise(const vector<int> &o)
 	{
 		iteration += 1;
 		old_P_star = P_star;
-		Logger::logger().log("Restimate lambda: iteration:", iteration, ", P* is:", P_star);
+		Logger::log("Restimate lambda: iteration:", iteration, "P* is:", P_star);
 
 		restimate(o);
 		tweak();

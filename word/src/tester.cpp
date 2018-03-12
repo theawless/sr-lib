@@ -17,7 +17,7 @@ vector<vector<double>> Tester::get_coefficients(string filename)
 {
 	vector<vector<double>> coefficients;
 	string coeffs_filename = filename + ".coeffs";
-	Logger::logger().log("Getting", coeffs_filename);
+	Logger::log("Getting", coeffs_filename);
 
 	Wav wav_file(filename + ".wav");
 	vector<vector<double>> frames = preprocessor.process(wav_file.get_samples<double>());
@@ -36,8 +36,8 @@ vector<vector<double>> Tester::get_coefficients(string filename)
 
 void Tester::load_codebook()
 {
-	const string codebook_filename = config.folder + "coeff.codebook";
-	Logger::logger().log("Getting", codebook_filename);
+	const string codebook_filename = config.folder + "sr-lib.codebook";
+	Logger::log("Getting", codebook_filename);
 
 	codebook.centroids = Utils::get_matrix_from_file<double>(codebook_filename);
 }
@@ -46,7 +46,7 @@ vector<int> Tester::get_observations(string filename)
 {
 	vector<int> observations;
 	string obs_filename = filename + ".obs";
-	Logger::logger().log("Getting", obs_filename);
+	Logger::log("Getting", obs_filename);
 
 	vector<vector<double>> coefficients = get_coefficients(filename);
 	observations = codebook.observations(coefficients);
@@ -62,7 +62,7 @@ void Tester::load_models()
 		string model_ext = ".model";
 		string filename = config.folder + config.audio_names[i];
 		string model_filename = filename + model_ext;
-		Logger::logger().log("Getting", model_filename);
+		Logger::log("Getting", model_filename);
 
 		model = Utils::get_item_from_file<Model>(model_filename);
 		models.push_back(model);
@@ -95,8 +95,6 @@ int Tester::decide_word(const vector<int> &observations)
 Tester::Tester(const Config &config) :config(config), preprocessor(320, 80),
 mfcc(), codebook(config.M), thread_pool(config.n_thread * thread::hardware_concurrency())
 {
-	Logger::logger().add_log(config.folder + "tester.log");
-
 	load_codebook();
 	load_models();
 }

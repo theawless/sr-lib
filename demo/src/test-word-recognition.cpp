@@ -12,17 +12,22 @@ using namespace std;
 
 int main()
 {
-	Config config("B:\\record\\digit_0.8_2\\");
-	config.audio_names = { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
-	config.n_utterances = vector<int>(config.audio_names.size(), 10);
+	Config config("B:/record/digit_0.8_2/");
+	config.load("sr-lib.config");
+
+	vector<int> saved_n_utterances(config.n_utterances);
+	for (int i = 0; i < config.n_utterances.size(); ++i)
+	{
+		config.n_utterances[i] *= 0.70;
+	}
+
 	Trainer trainer(config);
 	Tester tester(config);
 
-	int n_total_utterances = 16;
 	vector<int> n_hits(config.audio_names.size(), 0), n_errs(config.audio_names.size(), 0);
 	for (int i = 0; i < config.audio_names.size(); ++i)
 	{
-		for (int j = config.n_utterances[i]; j < n_total_utterances; ++j)
+		for (int j = config.n_utterances[i]; j < saved_n_utterances[i]; ++j)
 		{
 			string test_filename = config.audio_names[i] + "_" + to_string(j);
 			int word_index = tester.test(test_filename);
@@ -35,10 +40,10 @@ int main()
 			{
 				n_errs[i]++;
 			}
-			Logger::logger().log("The recognised word is:", word_index == -1 ? "###" : config.audio_names[word_index]);
+			Logger::log("The recognised word is:", word_index == -1 ? "###" : config.audio_names[word_index]);
 		}
 	}
 
-	Logger::logger().log("n_hits is:", accumulate(n_hits.begin(), n_hits.end(), 0));
-	Logger::logger().log("n_errs is:", accumulate(n_errs.begin(), n_errs.end(), 0));
+	Logger::log("n_hits is:", accumulate(n_hits.begin(), n_hits.end(), 0));
+	Logger::log("n_errs is:", accumulate(n_errs.begin(), n_errs.end(), 0));
 }

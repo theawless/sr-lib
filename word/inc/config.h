@@ -54,7 +54,7 @@ public:
 	/// Adds the word and returns its index.
 	int add_word(std::string word)
 	{
-		int index;
+		int index = 0;
 		std::vector<std::string>::iterator it = find(audio_names.begin(), audio_names.end(), word);
 		if (it != audio_names.end())
 		{
@@ -64,7 +64,6 @@ public:
 		{
 			audio_names.push_back(word);
 			n_utterances.push_back(1);
-			index = 0;
 		}
 
 		return index;
