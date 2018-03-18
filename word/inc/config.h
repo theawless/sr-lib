@@ -1,71 +1,91 @@
 #pragma once
 
-#include <iostream>
-#include <string>
+#include <map>
 #include <sstream>
+#include <string>
+#include <tuple>
 #include <vector>
 
 #include "utils.h"
 
-struct Config
+class Config
+{
+private:
+	const std::string filename;
+
+protected:
+	std::map<std::string, std::string> dict;
+
+public:
+	/// Constructor.
+	Config(std::string filename);
+
+	/// Loads the config.
+	void load();
+
+	/// Saves the config.
+	void save() const;
+
+	/// Gets the value from key.
+	template<typename T>
+	inline T get_val(std::string key, T fail) const
+	{
+		if (dict.find(key) == dict.end())
+		{
+			return fail;
+		}
+
+		T val;
+		std::stringstream(dict.at(key)) >> val;
+
+		return val;
+	}
+
+	/// Sets the value for key.
+	template<typename T>
+	inline void set_val(std::string key, T val)
+	{
+		std::stringstream stream;
+		stream << val;
+
+		dict[key] = stream.str();
+	}
+};
+
+class WordConfig : public Config
 {
 public:
-	int N = 5;
-	int M = 16;
-	int n_retrain = 3;
-	int n_thread = 4;
+	/// Constructor.
+	WordConfig(std::string filename);
 
-	std::string folder;
-	std::vector<std::string> audio_names;
-	std::vector<int> n_utterances;
+	/// Adds word.
+	int add(std::string word);
 
-	/// Constructor that loads the config file.
-	Config(std::string folder) :
-		folder(folder), audio_names(std::vector<std::string>()), n_utterances(std::vector<int>())
-	{
-	}
+	/// Get words.
+	std::vector<std::pair<std::string, int>> words() const;
+};
 
-	/// Load from filename.
-	void load(std::string filename)
-	{
-		std::vector<std::vector<std::string>> mat = Utils::get_matrix_from_file<std::string>(folder + filename);
-		for (int i = 0; i < mat.size(); ++i)
-		{
-			audio_names.push_back(mat[i][0]);
-			n_utterances.push_back(std::stoi(mat[i][1]));
-		}
-	}
+struct Parameters
+{
+public:
+	const int n_thread;
+	const int x_frame;
+	const int x_overlap;
+	const int n_cepstra;
+	const int n_predict;
+	const bool q_gain;
+	const bool q_delta;
+	const bool q_accel;
+	const int hz_sampling;
+	const int x_codebook;
+	const int n_state;
+	const int n_bakis;
+	const int n_retrain;
+	const std::string cepstral;
 
-	/// Save the config.
-	void save(std::string filename)
-	{
-		std::vector<std::vector<std::string>> mat;
-		for (int i = 0; i < audio_names.size(); ++i)
-		{
-			std::vector<std::string> vec;
-			vec.push_back(audio_names[i]);
-			vec.push_back(std::to_string(n_utterances[i]));
+	const std::string folder;
+	const std::vector<std::pair<std::string, int>> words;
 
-			mat.push_back(vec);
-		}
-		Utils::set_matrix_to_file<std::string>(mat, folder + filename);
-	}
-
-	/// Adds the word and returns its index.
-	int add_word(std::string word)
-	{
-		int index = 0;
-		std::vector<std::string>::iterator it = find(audio_names.begin(), audio_names.end(), word);
-		if (it != audio_names.end())
-		{
-			index = n_utterances[std::distance(audio_names.begin(), it)]++;
-		}
-		else
-		{
-			audio_names.push_back(word);
-			n_utterances.push_back(1);
-		}
-
-		return index;
-	}
+	/// Constructor.
+	Parameters(std::string folder, const std::vector<std::pair<std::string, int>> &words, const Config &config);
 };
