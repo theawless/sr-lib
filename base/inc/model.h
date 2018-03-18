@@ -11,15 +11,15 @@ public:
 	std::vector<double> pi;
 
 	/// Returns whether the model is empty.
-	bool empty();
+	bool empty() const;
 
 	/// Gets the base feed forward model.
-	static Model bakis(int N, int M);
+	static Model bakis(int N, int M, int step);
 
 	/// Merges the given models.
 	static Model merge(const std::vector<Model> &models);
 
-	/// Input/Output for loading/saving.
+	/// Operators for loading and saving.
 	friend std::istream &operator>>(std::istream &input, Model &model);
 	friend std::ostream &operator<<(std::ostream &output, const Model &model);
 };

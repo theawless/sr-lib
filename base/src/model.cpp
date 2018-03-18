@@ -4,22 +4,32 @@
 
 using namespace std;
 
-bool Model::empty()
+bool Model::empty() const
 {
 	return a.empty();
 }
 
-Model Model::bakis(int N, int M)
+Model Model::bakis(int N, int M, int step)
 {
 	Model model;
 
 	model.a = vector<vector<double>>(N, vector<double>(N, 0.0));
-	for (int i = 0; i < N - 1; ++i)
+	for (int i = 0; i < N - step; ++i)
 	{
-		model.a[i][i] = 0.9;
-		model.a[i][i + 1] = 0.1;
+		model.a[i][i] = 1 - step * 0.1;
+		for (int j = 0; j < step; ++j)
+		{
+			model.a[i][i + j + 1] = 0.1;
+		}
 	}
-	model.a[N - 1][N - 1] = 1;
+	for (int i = N - step; i < N; ++i)
+	{
+		model.a[i][i] = 1 - (N - 1 - i) * 0.1;
+		for (int j = 0; j < N - 1 - i; ++j)
+		{
+			model.a[i][i + j + 1] = 0.1;
+		}
+	}
 
 	model.b = vector<vector<double>>(N, vector<double>(M, 1.0 / M));
 
@@ -32,6 +42,7 @@ Model Model::bakis(int N, int M)
 Model Model::merge(const vector<Model> &models)
 {
 	int M = models[0].b[0].size(), N = models[0].b.size(), Q = models.size();
+
 	Model model;
 	model.a = vector<vector<double>>(N, vector<double>(N, 0.0));
 	model.b = vector<vector<double>>(N, vector<double>(M, 0.0));
@@ -91,21 +102,21 @@ istream &operator>>(istream &input, Model &model)
 	{
 		stream << c;
 	}
-	model.pi = Utils::get_vector_from_stream<double>(stream, ',');
+	model.pi = Utils::get_vector_from_stream<double>(stream);
 
 	input.get(); stream.str(""); stream.clear();
 	while (input.get(c) && c != 'b')
 	{
 		stream << c;
 	}
-	model.a = Utils::get_matrix_from_stream<double>(stream, '\n');
+	model.a = Utils::get_matrix_from_stream<double>(stream);
 
 	input.get(); stream.str(""); stream.clear();
 	while (input.get(c))
 	{
 		stream << c;
 	}
-	model.b = Utils::get_matrix_from_stream<double>(stream, '\n');
+	model.b = Utils::get_matrix_from_stream<double>(stream);
 
 	return input;
 }
@@ -113,11 +124,11 @@ istream &operator>>(istream &input, Model &model)
 ostream &operator<<(ostream &output, const Model &model)
 {
 	output << "pi" << '\n';
-	output << Utils::get_string_from_vector<double>(model.pi, ',') << '\n';
+	output << Utils::get_string_from_vector<double>(model.pi) << '\n';
 	output << "a" << '\n';
-	output << Utils::get_string_from_matrix<double>(model.a, '\n') << '\n';
+	output << Utils::get_string_from_matrix<double>(model.a) << '\n';
 	output << "b" << '\n';
-	output << Utils::get_string_from_matrix<double>(model.b, '\n') << '\n';
+	output << Utils::get_string_from_matrix<double>(model.b) << '\n';
 
 	return output;
 }
