@@ -1,4 +1,3 @@
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -11,9 +10,10 @@ using namespace std;
 class Recorder
 {
 private:
-	const static int sample_rate = 16000;
-	string folder;
-	string sox_path;
+	static constexpr int sample_rate = 16000;
+
+	const string folder;
+	const string sox_path;
 
 public:
 	/// Constructor.
@@ -28,24 +28,28 @@ public:
 
 		string base_command = '"' + sox_path + '"' + " -t waveaudio -c 1 -r " + to_string(sample_rate) + " -d -q -L ";
 		string full_command = base_command + wav_filename + " trim 0 " + to_string(duration);
-		Logger::log("Recording started, duration:", duration);
+		Logger::info("Recording started, duration:", duration);
 		system(full_command.c_str());
 	}
 };
 
 int main()
 {
-	Config config("B:\\record\\digit_0.8_2\\");
-	config.load("sr-lib.config");
-	Trainer trainer(config);
-	Tester tester(config);
+	const string folder = "B:\\record\\digit_0.8_2\\";
+	Config config(folder + "sr-lib.config");
+	WordConfig word_config(folder + "words.config");
+	config.load(); word_config.load();
+
+	Parameters parameters(folder, word_config.words(), config);
+	Trainer trainer(parameters);
+	Tester tester(parameters);
 
 	double duration = 0.8;
-	string test_filename = "test";
-	Recorder recorder(config.folder, "C:\\Program Files (x86)\\sox-14-4-2\\sox.exe");
+	string test_filename = "__test__";
+	Recorder recorder(folder, "C:\\Program Files (x86)\\sox-14-4-2\\sox.exe");
 
 	string ready;
-	while (Logger::log("Are you ready to speak? (y/n)"), cin >> ready)
+	while (Logger::info("Are you ready to speak? (y/n)"), cin >> ready)
 	{
 		if (ready != "Y" && ready != "y")
 		{
@@ -54,7 +58,7 @@ int main()
 
 		recorder.record(test_filename, duration);
 
-		int word_index = tester.test(test_filename);
-		Logger::log("The recognised word is:", word_index == -1 ? "###" : config.audio_names[word_index]);
+		Logger::info("The recognised word is:", tester.test(test_filename));
 	}
+	cin.get();
 }

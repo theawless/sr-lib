@@ -1,6 +1,5 @@
-#include <iostream>
-#include <string>
 #include <numeric>
+#include <string>
 #include <vector>
 
 #include "config.h"
@@ -12,38 +11,44 @@ using namespace std;
 
 int main()
 {
-	Config config("B:/record/digit_0.8_2/");
-	config.load("sr-lib.config");
+	const string folder = "B:\\record\\digit_0.8_2\\";
+	Config config(folder + "sr-lib.config");
+	WordConfig word_config(folder + "words.config");
+	config.load(); word_config.load();
 
-	vector<int> saved_n_utterances(config.n_utterances);
-	for (int i = 0; i < config.n_utterances.size(); ++i)
+	vector<pair<string, int>> saved_words = word_config.words();
+	vector<pair<string, int>> new_words(saved_words);
+	for (int i = 0; i < new_words.size(); ++i)
 	{
-		config.n_utterances[i] *= 0.70;
+		new_words[i].second *= 0.70;
 	}
 
-	Trainer trainer(config);
-	Tester tester(config);
+	Logger::info("Training");
+	Parameters parameters(folder, new_words, config);
+	Trainer trainer(parameters);
+	Tester tester(parameters);
 
-	vector<int> n_hits(config.audio_names.size(), 0), n_errs(config.audio_names.size(), 0);
-	for (int i = 0; i < config.audio_names.size(); ++i)
+	vector<int> n_hits(saved_words.size(), 0), n_errs(saved_words.size(), 0);
+	for (int i = 0; i < saved_words.size(); ++i)
 	{
-		for (int j = config.n_utterances[i]; j < saved_n_utterances[i]; ++j)
+		for (int j = new_words[i].second; j < saved_words[i].second; ++j)
 		{
-			string test_filename = config.audio_names[i] + "_" + to_string(j);
-			int word_index = tester.test(test_filename);
+			string test_filename = saved_words[i].first + "_" + to_string(j);
+			string word = tester.test(test_filename);
 
-			if (word_index == i)
+			if (word == saved_words[i].first)
 			{
 				n_hits[i]++;
 			}
-			if (word_index == -1)
+			if (word == "")
 			{
 				n_errs[i]++;
 			}
-			Logger::log("The recognised word is:", word_index == -1 ? "###" : config.audio_names[word_index]);
+			Logger::info("The recognised word is:", word);
 		}
 	}
 
-	Logger::log("n_hits is:", accumulate(n_hits.begin(), n_hits.end(), 0));
-	Logger::log("n_errs is:", accumulate(n_errs.begin(), n_errs.end(), 0));
+	Logger::info("n_hits is:", accumulate(n_hits.begin(), n_hits.end(), 0));
+	Logger::info("n_errs is:", accumulate(n_errs.begin(), n_errs.end(), 0));
+	cin.get();
 }
