@@ -18,8 +18,10 @@ private:
 	/// Fix DC offset of the signal.
 	void dc_offset(std::vector<double> &samples) const;
 
-	/// Normalise amplitudes of the signal.
+	/// Normalise the signal.
 	void normalise(std::vector<double> &samples) const;
+
+	std::vector<double> Preprocessor::trim(const std::vector<double> &samples) const;
 
 	/// Premphasize - boost the higher frequencies.
 	void pre_emphasize(std::vector<double> &samples) const;

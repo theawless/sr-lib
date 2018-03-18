@@ -23,11 +23,11 @@ vector<double> Preprocessor::setup_hamming_coefficients(int x_frames)
 
 void Preprocessor::dc_offset(vector<double> &samples) const
 {
-	const double mean_amplitude = accumulate(samples.begin(), samples.end(), 0.0) / samples.size();
+	const double mean_sample = accumulate(samples.begin(), samples.end(), 0.0) / samples.size();
 
 	for (int i = 0; i < samples.size(); ++i)
 	{
-		samples[i] -= mean_amplitude;
+		samples[i] -= mean_sample;
 	}
 }
 
@@ -39,6 +39,33 @@ void Preprocessor::normalise(vector<double> &samples) const
 	{
 		samples[i] *= normalisation_factor;
 	}
+}
+
+vector<double> Preprocessor::trim(const vector<double> &samples) const
+{
+	const int bg_window = 800;
+	const int window = 80;
+
+	const vector<double> bg(samples.begin(), samples.begin() + bg_window);
+	const double mean_bg = accumulate(bg.begin(), bg.end(), 0.0) / samples.size();
+	const double sd_bg = sqrt(accumulate(bg.begin(), bg.end(), 0.0, [mean_bg](double a, double b) { return a + pow(b - mean_bg, 2); }) / bg_window);
+
+	vector<double> trimmed_samples;
+	for (int i = 0; i <= samples.size() - window; i += window)
+	{
+		int voiced = 0;
+		for (int j = 0; j < window; ++j)
+		{
+			double distance = abs(samples[i + j] - mean_bg) / sd_bg;
+			voiced += distance > 3.0 ? 1 : -1;
+		}
+		if (voiced > 0)
+		{
+			trimmed_samples.insert(trimmed_samples.end(), samples.begin() + i, samples.begin() + i + window);
+		}
+	}
+
+	return trimmed_samples;
 }
 
 void Preprocessor::pre_emphasize(vector<double> &samples) const
@@ -83,6 +110,7 @@ vector<vector<double>> Preprocessor::process(const vector<double> &unprocessed_s
 
 	dc_offset(samples);
 	normalise(samples);
+	samples = trim(samples);
 	pre_emphasize(samples);
 
 	return framing(samples);
