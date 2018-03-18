@@ -1,72 +1,79 @@
 #include "tester.h"
 
-#include <fstream>
-#include <iostream>
-#include <numeric>
-#include <thread>
+#include <limits>
 #include <tuple>
 
 #include "hmm.h"
 #include "logger.h"
+#include "lpc.h"
+#include "mfc.h"
 #include "utils.h"
 #include "wav.h"
 
 using namespace std;
 
-vector<vector<double>> Tester::get_coefficients(string filename)
+ICepstral *Tester::setup_cepstral(const Parameters &parameters)
 {
-	vector<vector<double>> coefficients;
-	string coeffs_filename = filename + ".coeffs";
-	Logger::log("Getting", coeffs_filename);
-
-	Wav wav_file(filename + ".wav");
-	vector<vector<double>> frames = preprocessor.process(wav_file.get_samples<double>());
-	vector<future<vector<double>>> coefficients_futures;
-	for (int i = 0; i < frames.size(); ++i)
+	if (parameters.cepstral == "lpc")
 	{
-		coefficients_futures.push_back(thread_pool.enqueue(&MFCC::coeffs, mfcc, frames[i]));
+		return new LPC(parameters.n_cepstra, parameters.q_gain, parameters.q_delta, parameters.q_accel, parameters.n_predict);
 	}
-	for (int i = 0; i < frames.size(); ++i)
+	else if (parameters.cepstral == "mfc")
 	{
-		coefficients.push_back(coefficients_futures[i].get());
+		return new MFC(parameters.n_cepstra, parameters.q_gain, parameters.q_delta, parameters.q_accel, parameters.hz_sampling);
 	}
-
-	return coefficients;
+	else
+	{
+		return nullptr;
+	}
 }
 
 void Tester::load_codebook()
 {
-	const string codebook_filename = config.folder + "sr-lib.codebook";
+	const string codebook_filename = parameters.folder + "words.codebook";
 	Logger::log("Getting", codebook_filename);
 
 	codebook.centroids = Utils::get_matrix_from_file<double>(codebook_filename);
 }
 
-vector<int> Tester::get_observations(string filename)
+vector<vector<double>> Tester::get_features(string filename) const
 {
-	vector<int> observations;
-	string obs_filename = filename + ".obs";
-	Logger::log("Getting", obs_filename);
+	vector<vector<double>> features;
+	const string features_filename = filename + ".features";
+	Logger::log("Getting", features_filename);
 
-	vector<vector<double>> coefficients = get_coefficients(filename);
-	observations = codebook.observations(coefficients);
+	const Wav wav_file(filename + ".wav");
+	const vector<vector<double>> frames = preprocessor.process(wav_file.samples<double>());
+	features = cepstral->features(frames);
 
-	return observations;
+	return features;
 }
 
 void Tester::load_models()
 {
-	for (int i = 0; i < config.audio_names.size(); ++i)
+	for (int i = 0; i < parameters.words.size(); ++i)
 	{
 		Model model;
-		string model_ext = ".model";
-		string filename = config.folder + config.audio_names[i];
-		string model_filename = filename + model_ext;
+		const string model_ext = ".model";
+		const string filename = parameters.folder + parameters.words[i].first;
+		const string model_filename = filename + model_ext;
 		Logger::log("Getting", model_filename);
 
 		model = Utils::get_item_from_file<Model>(model_filename);
 		models.push_back(model);
 	}
+}
+
+vector<int> Tester::get_observations(string filename) const
+{
+	vector<int> observations;
+	const string obs_filename = filename + ".observations";
+	Logger::log("Getting", obs_filename);
+
+	const vector<vector<double>> features = get_features(filename);
+	observations = codebook.observations(features);
+
+	return observations;
 }
 
 int Tester::decide_word(const vector<int> &observations)
@@ -81,7 +88,7 @@ int Tester::decide_word(const vector<int> &observations)
 	}
 	for (int i = 0; i < models.size(); ++i)
 	{
-		double P = P_futures[i].get().first;
+		const double P = P_futures[i].get().first;
 		if (max_P < P)
 		{
 			max_P = P;
@@ -92,17 +99,17 @@ int Tester::decide_word(const vector<int> &observations)
 	return most_probable_word_index;
 }
 
-Tester::Tester(const Config &config) :config(config), preprocessor(320, 80),
-mfcc(), codebook(config.M), thread_pool(config.n_thread * thread::hardware_concurrency())
+Tester::Tester(const Parameters &parameters) :parameters(parameters), preprocessor(parameters.x_frame, parameters.x_overlap),
+cepstral(setup_cepstral(parameters)), codebook(parameters.x_codebook), thread_pool(parameters.n_thread)
 {
 	load_codebook();
 	load_models();
 }
 
-int Tester::test(string filename)
+string Tester::test(string filename)
 {
-	vector<int> observations = get_observations(config.folder + filename);
-	int word_index = decide_word(observations);
+	const vector<int> observations = get_observations(parameters.folder + filename);
+	const int word_index = decide_word(observations);
 
-	return word_index;
+	return word_index < parameters.words.size() ? parameters.words[word_index].first : "";
 }
