@@ -10,19 +10,7 @@ namespace Maths
 {
 	double energy(const vector<double> &f)
 	{
-		double E = 0.0;
-
-		for (int i = 0; i < f.size(); ++i)
-		{
-			E += pow(f[i], 2);
-		}
-
-		return E;
-	}
-
-	double energy_absolute(const vector<double> &f)
-	{
-		return accumulate(f.begin(), f.end(), 0.0, [](double a, double b) { return abs(a) * abs(b); });
+		return accumulate(f.begin(), f.end(), 0.0, [](int a, int b) { return a + pow(b, 2); });
 	}
 
 	double maximum_absolute(const vector<double> &f)
@@ -32,9 +20,9 @@ namespace Maths
 
 	int zcr(const vector<double> &f)
 	{
-		double s = 0.0, old_s = 0.0;
-
 		int zcr = 0;
+
+		double s = 0.0, old_s = 0.0;
 		for (int i = 0; i < f.size(); ++i)
 		{
 			s = f[i];
@@ -48,13 +36,13 @@ namespace Maths
 		return zcr;
 	}
 
-	double tokhura_distance(const vector<double> &A, const vector<double> &B)
+	double distance(const vector<double> &A, const vector<double> &B)
 	{
 		double d = 0.0;
 
-		for (int i = 0; i < A.size(); ++i)
+		for (int i = 0; i < A.size() && i < B.size(); ++i)
 		{
-			d += tokhura[i] * pow((A[i] - B[i]), 2);
+			d += pow((A[i] - B[i]), 2);
 		}
 
 		return d;
