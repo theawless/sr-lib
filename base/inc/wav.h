@@ -59,7 +59,7 @@ public:
 
 	/// Gets the samples as type.
 	template <typename T>
-	inline std::vector<T> get_samples()
+	inline std::vector<T> samples() const
 	{
 		std::vector<T> samples;
 		for (int i = 0; i < data.size(); ++i)
@@ -68,11 +68,5 @@ public:
 		}
 
 		return samples;
-	}
-
-	/// Gets the sample rate.
-	inline int get_sample_rate()
-	{
-		return sample_rate;
 	}
 };

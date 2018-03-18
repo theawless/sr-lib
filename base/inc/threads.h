@@ -22,9 +22,9 @@ private:
 
 public:
 	/// Constructor.
-	inline ThreadPool(int n_threads)
+	inline ThreadPool(int n_thread)
 	{
-		for (int i = 0; i < n_threads; ++i)
+		for (int i = 0; i < n_thread; ++i)
 		{
 			workers.emplace_back
 			(
