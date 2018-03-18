@@ -9,7 +9,7 @@ using namespace std;
 
 void HMM::tweak()
 {
-	int M = lambda.b[0].size(), N = lambda.b.size();
+	const int M = lambda.b[0].size(), N = lambda.b.size();
 
 	for (int i = 0; i < N; ++i)
 	{
@@ -18,7 +18,7 @@ void HMM::tweak()
 		{
 			if (lambda.a[i][j] != 0)
 			{
-				dummy = min(dummy, lambda.a[i][j] / 10);
+				dummy = min(dummy, lambda.a[i][j] / 10.0);
 			}
 		}
 		int count = 0;
@@ -48,7 +48,7 @@ void HMM::tweak()
 		{
 			if (lambda.b[i][j] != 0)
 			{
-				dummy = min(dummy, lambda.b[i][j] / 10);
+				dummy = min(dummy, lambda.b[i][j] / 10.0);
 			}
 		}
 		int count = 0;
@@ -74,14 +74,15 @@ void HMM::tweak()
 
 pair<double, vector<int>> HMM::viterbi(const vector<int> &o)
 {
-	int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
+	const int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
 
-	vector<int> psi(T, 0);
 	vector<vector<double>> delta(T, vector<double>(N, 0.0));
 	for (int i = 0; i < N; ++i)
 	{
 		delta[0][i] = lambda.pi[i] * lambda.b[i][o[0]];
 	}
+
+	vector<int> psi(T, 0);
 	for (int t = 0; t < T - 1; ++t)
 	{
 		for (int i = 0; i < N; ++i)
@@ -102,20 +103,19 @@ pair<double, vector<int>> HMM::viterbi(const vector<int> &o)
 
 	vector<int> q(T, 0);
 	q[T - 1] = max_element(delta[T - 1].begin(), delta[T - 1].end()) - delta[T - 1].begin();
+	const double P_star = delta[T - 1][q[T - 1]];
 	for (int i = T - 2; i >= 0; --i)
 	{
 		q[i] = psi[q[i + 1]];
 	}
-	double P_star = delta[T - 1][q[T - 1]];
 
 	return pair<double, vector<int>>(P_star, q);
 }
 
 pair<double, vector<int>> HMM::viterbi_logged(const vector<int> &o)
 {
-	int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
+	const int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
 
-	vector<int> psi(T, 0);
 	vector<vector<double>> delta(T, vector<double>(N, 0.0));
 	for (int i = 0; i < N; ++i)
 	{
@@ -126,6 +126,8 @@ pair<double, vector<int>> HMM::viterbi_logged(const vector<int> &o)
 		}
 		delta[0][i] = log(temp) + log(lambda.b[i][o[0]]);
 	}
+
+	vector<int> psi(T, 0);
 	for (int t = 0; t < T - 1; ++t)
 	{
 		for (int i = 0; i < N; ++i)
@@ -146,18 +148,18 @@ pair<double, vector<int>> HMM::viterbi_logged(const vector<int> &o)
 
 	vector<int> q(T, 0);
 	q[T - 1] = max_element(delta[T - 1].begin(), delta[T - 1].end()) - delta[T - 1].begin();
+	const double P_star = delta[T - 1][q[T - 1]];
 	for (int i = T - 2; i >= 0; --i)
 	{
 		q[i] = psi[q[i + 1]];
 	}
-	double P_star = delta[T - 1][q[T - 1]];
 
 	return pair<double, vector<int>>(P_star, q);
 }
 
 vector<vector<double>> HMM::backward(const vector<int> &o)
 {
-	int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
+	const int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
 
 	vector<vector<double>> beta(T, vector<double>(N, 0.0));
 	for (int i = 0; i < N; ++i)
@@ -180,10 +182,10 @@ vector<vector<double>> HMM::backward(const vector<int> &o)
 
 vector<vector<double>> HMM::backward_scaled(const vector<int> &o)
 {
-	int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
-	double C = 0;
+	const int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
 
 	vector<vector<double>> beta(T, vector<double>(N, 0.0));
+	double C = 0.0;
 	for (int i = 0; i < N; ++i)
 	{
 		beta[T - 1][i] = 1;
@@ -196,7 +198,7 @@ vector<vector<double>> HMM::backward_scaled(const vector<int> &o)
 
 	for (int t = T - 2; t >= 0; --t)
 	{
-		C = 0;
+		C = 0.0;
 		for (int i = 0; i < N; ++i)
 		{
 			for (int j = 0; j < N; ++j)
@@ -216,10 +218,10 @@ vector<vector<double>> HMM::backward_scaled(const vector<int> &o)
 
 void HMM::restimate(const vector<int> &o)
 {
-	int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
+	const int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
 
-	vector<vector<double>> alpha = forward(o).second;
-	vector<vector<double>> beta = backward(o);
+	const vector<vector<double>> alpha = forward(o).second;
+	const vector<vector<double>> beta = backward(o);
 	vector<vector<vector<double>>> xsi(T, vector<vector<double>>(N, vector<double>(N, 0.0)));
 	for (int t = 0; t < T - 1; ++t)
 	{
@@ -305,9 +307,30 @@ HMM::HMM(const Model &lambda) : lambda(lambda)
 {
 }
 
+Model HMM::optimise(const vector<int> &o)
+{
+	int iteration = 0;
+	double old_P_star, P_star;
+
+	tweak();
+	P_star = viterbi_logged(o).first;
+	do
+	{
+		iteration += 1;
+		old_P_star = P_star;
+		Logger::log("Restimate lambda: iteration:", iteration, "P* is:", P_star);
+
+		restimate(o);
+		tweak();
+		P_star = viterbi_logged(o).first;
+	} while (P_star / old_P_star > convergence_threshold && iteration < convergence_max_iterations);
+
+	return lambda;
+}
+
 pair<double, vector<vector<double>>> HMM::forward(const vector<int> &o)
 {
-	int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
+	const int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
 
 	vector<vector<double>> alpha(T, vector<double>(N, 0.0));
 	for (int i = 0; i < N; ++i)
@@ -337,10 +360,10 @@ pair<double, vector<vector<double>>> HMM::forward(const vector<int> &o)
 
 pair<double, vector<vector<double>>> HMM::forward_scaled(const vector<int> &o)
 {
-	int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
-	double C = 0;
+	const int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
 
 	vector<vector<double>> alpha(T, vector<double>(N, 0.0));
+	double C = 0.0;
 	for (int i = 0; i < N; ++i)
 	{
 		alpha[0][i] = lambda.pi[i] * lambda.b[i][o[0]];
@@ -353,7 +376,7 @@ pair<double, vector<vector<double>>> HMM::forward_scaled(const vector<int> &o)
 
 	for (int t = 0; t < T - 1; ++t)
 	{
-		C = 0;
+		C = 0.0;
 		for (int i = 0; i < N; ++i)
 		{
 			for (int j = 0; j < N; ++j)
@@ -376,25 +399,4 @@ pair<double, vector<vector<double>>> HMM::forward_scaled(const vector<int> &o)
 	}
 
 	return pair<double, vector<vector<double>>>(P, alpha);
-}
-
-Model HMM::optimise(const vector<int> &o)
-{
-	int iteration = 0;
-	double old_P_star, P_star;
-
-	tweak();
-	P_star = viterbi_logged(o).first;
-	do
-	{
-		iteration += 1;
-		old_P_star = P_star;
-		Logger::log("Restimate lambda: iteration:", iteration, "P* is:", P_star);
-
-		restimate(o);
-		tweak();
-		P_star = viterbi_logged(o).first;
-	} while (P_star / old_P_star > convergence_threshold && iteration < convergence_max_iterations);
-
-	return lambda;
 }
