@@ -54,6 +54,7 @@ int main()
 	}
 
 	// exhaustive search, use fewer options
+	vector<string> cepstral_values = { "mfc", "lpc" };
 	vector<int> n_cepstra_values = { 12, 16, 20, 24 };
 	vector<int> n_predict_values = { 8, 10, 13, 16 };
 	vector<bool> q_gain_values = { false, true };
@@ -63,29 +64,28 @@ int main()
 	vector<int> n_state_values = { 5, 8, 10, 12 };
 	vector<int> n_bakis_values = { 1, 2, 3, 4 };
 	vector<int> n_retrain_values = { 3, 4, 5 };
-	vector<string> cepstral_values = { "mfc", "lpc" };
 
 	int n_hits = numeric_limits<int>::min();
 
-	for (int n_cepstra : n_cepstra_values)
+	for (string cepstral : cepstral_values)
 	{
-		for (int n_predict : n_predict_values)
+		for (int n_cepstra : n_cepstra_values)
 		{
-			for (bool q_gain : q_gain_values)
+			for (int n_predict : n_predict_values)
 			{
-				for (bool q_delta : q_delta_values)
+				for (bool q_gain : q_gain_values)
 				{
-					for (bool q_accel : q_accel_values)
+					for (bool q_delta : q_delta_values)
 					{
-						for (int x_codebook : x_codebook_values)
+						for (bool q_accel : q_accel_values)
 						{
-							for (int n_state : n_state_values)
+							for (int x_codebook : x_codebook_values)
 							{
-								for (int n_bakis : n_bakis_values)
+								for (int n_state : n_state_values)
 								{
-									for (int n_retrain : n_retrain_values)
+									for (int n_bakis : n_bakis_values)
 									{
-										for (string cepstral : cepstral_values)
+										for (int n_retrain : n_retrain_values)
 										{
 											if (cepstral == "mfc" && n_predict != n_predict_values[0])
 											{

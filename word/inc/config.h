@@ -68,23 +68,21 @@ public:
 struct Parameters
 {
 public:
+	const std::string folder;
+	const std::vector<std::pair<std::string, int>> words;
 	const int n_thread;
 	const int x_frame;
 	const int x_overlap;
+	const std::string cepstral;
 	const int n_cepstra;
 	const int n_predict;
 	const bool q_gain;
 	const bool q_delta;
 	const bool q_accel;
-	const int hz_sampling;
 	const int x_codebook;
 	const int n_state;
 	const int n_bakis;
 	const int n_retrain;
-	const std::string cepstral;
-
-	const std::string folder;
-	const std::vector<std::pair<std::string, int>> words;
 
 	/// Constructor.
 	Parameters(std::string folder, const std::vector<std::pair<std::string, int>> &words, const Config &config);

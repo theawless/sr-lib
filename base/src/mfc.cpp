@@ -23,7 +23,7 @@ map<int, map<int, complex<double>>> MFC::setup_twiddle()
 	return twiddle;
 }
 
-vector<vector<double>> MFC::setup_filter_bank(double hz_sampling)
+vector<vector<double>> MFC::setup_filter_bank()
 {
 	vector<vector<double>> filter_bank(n_filters, vector<double>(n_fft_bins, 0.0));
 
@@ -195,7 +195,7 @@ void MFC::normalise(vector<double> &C) const
 	}
 }
 
-MFC::MFC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel, int hz_sampling) : ICepstral(n_cepstra, q_gain, q_delta, q_accel),
-hz_sampling(hz_sampling), twiddle(setup_twiddle()), filter_bank(setup_filter_bank(hz_sampling)), dct_matrix(setup_dct_matrix(n_cepstra))
+MFC::MFC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel) : ICepstral(n_cepstra, q_gain, q_delta, q_accel),
+twiddle(setup_twiddle()), filter_bank(setup_filter_bank()), dct_matrix(setup_dct_matrix(n_cepstra))
 {
 }

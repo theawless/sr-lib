@@ -54,10 +54,11 @@ vector<pair<string, int>> WordConfig::words() const
 }
 
 Parameters::Parameters(string folder, const vector<pair<string, int>> &words, const Config &config) : folder(folder), words(words),
-n_thread(config.get_val<int>("n_thread", 4 * std::thread::hardware_concurrency())), x_frame(config.get_val<int>("x_frame", 300)), x_overlap(config.get_val<int>("x_overlap", 80)),
-n_cepstra(config.get_val<int>("n_cepstra", 12)), n_predict(config.get_val<int>("n_predict", 12)), q_gain(config.get_val<bool>("q_gain", false)),
-q_delta(config.get_val<bool>("q_delta", false)), q_accel(config.get_val<bool>("q_accel", false)), hz_sampling(config.get_val<int>("hz_sampling", 16000)),
-x_codebook(config.get_val<int>("x_codebook", 16)), n_state(config.get_val<int>("n_state", 5)), n_bakis(config.get_val<int>("n_bakis", 1)),
-n_retrain(config.get_val<int>("n_retrain", 3)), cepstral(config.get_val<string>("cepstral", "mfc"))
+n_thread(config.get_val<int>("n_thread", 4 * std::thread::hardware_concurrency())),
+x_frame(config.get_val<int>("x_frame", 300)), x_overlap(config.get_val<int>("x_overlap", 80)),
+cepstral(config.get_val<string>("cepstral", "mfc")), n_cepstra(config.get_val<int>("n_cepstra", 12)), n_predict(config.get_val<int>("n_predict", 12)),
+q_gain(config.get_val<bool>("q_gain", false)), q_delta(config.get_val<bool>("q_delta", false)), q_accel(config.get_val<bool>("q_accel", false)),
+x_codebook(config.get_val<int>("x_codebook", 16)), n_state(config.get_val<int>("n_state", 5)),
+n_bakis(config.get_val<int>("n_bakis", 1)), n_retrain(config.get_val<int>("n_retrain", 3))
 {
 }

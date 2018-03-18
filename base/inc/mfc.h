@@ -14,10 +14,10 @@ private:
 	static constexpr int n_fft = 512;
 	static constexpr double hz_low = 50;
 	static constexpr double hz_high = 6500;
+	static constexpr double hz_sampling = 16000;
 	static constexpr int n_filters = 40;
 	static constexpr int n_fft_bins = 247;
 
-	const int hz_sampling;
 	const std::map<int, std::map<int, std::complex<double>>> twiddle;
 	const std::vector<std::vector<double>> filter_bank;
 	const std::vector<std::vector<double>> dct_matrix;
@@ -26,7 +26,7 @@ private:
 	static std::map<int, std::map<int, std::complex<double>>> setup_twiddle();
 
 	/// Compute filterbank.
-	static std::vector<std::vector<double>> setup_filter_bank(double hz_sampling);
+	static std::vector<std::vector<double>> setup_filter_bank();
 
 	/// Hertz to mel.
 	static double hertz2mel(double f);
@@ -57,5 +57,5 @@ private:
 
 public:
 	/// Constructor.
-	MFC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel, int hz_sampling);
+	MFC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel);
 };

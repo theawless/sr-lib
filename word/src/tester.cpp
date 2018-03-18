@@ -20,7 +20,7 @@ ICepstral *Tester::setup_cepstral(const Parameters &parameters)
 	}
 	else if (parameters.cepstral == "mfc")
 	{
-		return new MFC(parameters.n_cepstra, parameters.q_gain, parameters.q_delta, parameters.q_accel, parameters.hz_sampling);
+		return new MFC(parameters.n_cepstra, parameters.q_gain, parameters.q_delta, parameters.q_accel);
 	}
 	else
 	{
