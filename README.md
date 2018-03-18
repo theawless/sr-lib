@@ -1,8 +1,9 @@
 # sr-lib
-A c++ library for speech recognition.
+C++ Automatic Speech Recognition library for my [BTech Project](https://github.com/theawless/BTech-Project). 
 
-* Audio Processing
-* Codebook generation
-* Linear Predictive Coding (LPC) feature extraction
-* HMM
-* Voiced/Unvoiced detection and Trimming of signal
+* Wave Reader
+* Audio Preprocessor
+* Linear Predictive Cepstral Coefficients (LPCC)
+* Mel Filter Cepstral Coefficients (MFCC)
+* Vector Quantisation (VQ) - LBG, KMeans
+* Hidden Markov Model (HMM) - Baum–Welch, Viterbi
