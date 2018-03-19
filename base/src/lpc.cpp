@@ -5,20 +5,20 @@
 
 using namespace std;
 
-vector<double> LPC::setup_sine_coefficients(int N)
+vector<double> LPC::setup_sine_coefficients(int n_cepstra)
 {
-	vector<double> sine_coefficients(N + 1, 1.0);
+	vector<double> sine_coefficients(n_cepstra + 1, 1.0);
 
 	const double pi = 4.0 * atan(1.0);
-	for (int i = 0; i < N + 1; ++i)
+	for (int i = 0; i < n_cepstra + 1; ++i)
 	{
-		sine_coefficients[i] += N / 2.0 * sin(i * pi / N);
+		sine_coefficients[i] += n_cepstra / 2.0 * sin(i * pi / n_cepstra);
 	}
 
 	return sine_coefficients;
 }
 
-vector<double> LPC::coefficients(const vector<double> &frame) const
+Feature LPC::feature(const vector<double> &frame) const
 {
 	const vector<double> R = auto_correlation(frame);
 	const vector<double> A = durbin_solve(R);
@@ -26,7 +26,7 @@ vector<double> LPC::coefficients(const vector<double> &frame) const
 	vector<double> C = cepstral_coefficients(G_squared, A);
 	sine_window(C);
 
-	return C;
+	return Feature{ C };
 }
 
 vector<double> LPC::auto_correlation(const vector<double> &frame) const

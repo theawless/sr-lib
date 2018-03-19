@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <numeric>
 
 using namespace std;
@@ -29,6 +30,8 @@ vector<vector<double>> MFC::setup_filter_bank()
 
 	// calculate filter centre-frequencies
 	vector<double> hz_filter_center(n_filters + 2, 0.0);
+	function<double(double)> hertz2mel = [](double hz) { return 2595 * log10(1 + hz / 700); };
+	function<double(double)> mel2hertz = [](double mel) { return 700 * (pow(10, mel / 2595) - 1); };
 	const double low_mel = hertz2mel(hz_low);
 	const double high_mel = hertz2mel(hz_high);
 	for (int i = 0; i < n_filters + 2; ++i)
@@ -65,16 +68,6 @@ vector<vector<double>> MFC::setup_filter_bank()
 	return filter_bank;
 }
 
-double MFC::hertz2mel(double hz)
-{
-	return 2595 * log10(1 + hz / 700);
-}
-
-double MFC::mel2hertz(double mel)
-{
-	return 700 * (pow(10, mel / 2595) - 1);
-}
-
 vector<vector<double>> MFC::setup_dct_matrix(int n_cepstra)
 {
 	vector<vector<double>> dct_matrix(n_cepstra + 1, vector<double>(n_filters, 0.0));
@@ -92,14 +85,14 @@ vector<vector<double>> MFC::setup_dct_matrix(int n_cepstra)
 	return dct_matrix;
 }
 
-vector<double> MFC::coefficients(const vector<double> &frame) const
+Feature MFC::feature(const vector<double> &frame) const
 {
 	const vector<double> P = power_spectrum(frame);
 	const vector<double> H = lmfb(P);
 	vector<double> C = dct(H);
 	normalise(C);
 
-	return C;
+	return Feature{ C };
 }
 
 vector<double> MFC::power_spectrum(const vector<double> &frame) const

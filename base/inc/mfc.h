@@ -28,17 +28,11 @@ private:
 	/// Compute filterbank.
 	static std::vector<std::vector<double>> setup_filter_bank();
 
-	/// Hertz to mel.
-	static double hertz2mel(double f);
-
-	/// Mel to hertz.
-	static double mel2hertz(double m);
-
 	/// Compute dct matrix.
 	static std::vector<std::vector<double>> setup_dct_matrix(int n_cepstra);
 
 	/// Find mfcc for given frame.
-	std::vector<double> coefficients(const std::vector<double> &frame) const;
+	Feature feature(const std::vector<double> &frame) const;
 
 	/// Find power spectrum.
 	std::vector<double> power_spectrum(const std::vector<double> &frame) const;

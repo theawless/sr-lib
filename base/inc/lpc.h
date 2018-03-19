@@ -11,10 +11,10 @@ private:
 	const std::vector<double> sine_coefficients;
 
 	/// Compute sine coefficients
-	static std::vector<double> setup_sine_coefficients(int N);
+	static std::vector<double> setup_sine_coefficients(int n_cepstra);
 
 	/// Find lpcc for given frame.
-	std::vector<double> coefficients(const std::vector<double> &frame) const;
+	Feature feature(const std::vector<double> &frame) const;
 
 	/// Find autocorrelation of a vector.
 	std::vector<double> auto_correlation(const std::vector<double> &frame) const;

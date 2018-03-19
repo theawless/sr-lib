@@ -1,6 +1,20 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
+
+struct Feature
+{
+public:
+	std::vector<double> coefficients;
+
+	/// Find the distance with feature.
+	double distance(const Feature &feature) const;
+
+	/// Operators for loading and saving.
+	friend std::istream &operator>>(std::istream &input, Feature &feature);
+	friend std::ostream &operator<<(std::ostream &output, const Feature &feature);
+};
 
 class ICepstral
 {
@@ -13,10 +27,10 @@ private:
 	const bool q_accel;
 
 	/// Subclasses will return coefficients for a frame.
-	virtual std::vector<double> coefficients(const std::vector<double> &frame) const = 0;
+	virtual Feature feature(const std::vector<double> &frame) const = 0;
 
-	/// Gets delta vectors with given transgression window.
-	static std::vector<std::vector<double>> delta(const std::vector<std::vector<double>> &coefficients, int W);
+	/// Gets delta features with given transgression window.
+	static std::vector<Feature> delta(const std::vector<Feature> &features, int W);
 
 protected:
 	const int n_cepstra;
@@ -26,5 +40,5 @@ public:
 	ICepstral(int n_cepstral, bool q_gain, bool q_delta, bool q_accel);
 
 	/// Gets the features.
-	std::vector<std::vector<double>> features(const std::vector<std::vector<double>> &frames) const;
+	std::vector<Feature> features(const std::vector<std::vector<double>> &frames) const;
 };

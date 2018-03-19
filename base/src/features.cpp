@@ -2,23 +2,51 @@
 
 #include <cmath>
 
+#include "utils.h"
+
 using namespace std;
 
-vector<vector<double>> ICepstral::delta(const vector<vector<double>> &coefficients, int W)
+double Feature::distance(const Feature &feature) const
 {
-	vector<vector<double>> delta(coefficients);
+	double distance = 0.0;
+
+	for (int i = 0; i < coefficients.size() && i < feature.coefficients.size(); ++i)
+	{
+		distance += pow((coefficients[i] - feature.coefficients[i]), 2);
+	}
+
+	return distance;
+}
+
+istream &operator>>(istream &input, Feature &feature)
+{
+	feature.coefficients = Utils::get_vector_from_stream<double>(input);
+
+	return input;
+}
+
+ostream &operator<<(ostream &output, const Feature &feature)
+{
+	output << Utils::get_string_from_vector<double>(feature.coefficients);
+
+	return output;
+}
+
+vector<Feature> ICepstral::delta(const vector<Feature> &features, int W)
+{
+	vector<Feature> delta(features);
 
 	const double denominator = W * (2.0 * W + 1.0) * (W + 1.0) / 3.0 - pow(W, 2);
-	for (int i = W; i < coefficients.size() - W; ++i)
+	for (int i = W; i < features.size() - W; ++i)
 	{
-		for (int j = 0; j < coefficients[0].size(); ++j)
+		for (int j = 0; j < features[0].coefficients.size(); ++j)
 		{
 			double numerator = 0.0;
 			for (int k = -W; k <= W; ++k)
 			{
-				numerator += k * coefficients[k + i][j];
+				numerator += k * features[k + i].coefficients[j];
 			}
-			delta[i][j] = numerator / denominator;
+			delta[i].coefficients[j] = numerator / denominator;
 		}
 	}
 
@@ -30,33 +58,33 @@ ICepstral::ICepstral(int n_cepstra, bool q_gain, bool q_delta, bool q_accel)
 {
 }
 
-vector<vector<double>> ICepstral::features(const vector<vector<double>> &frames) const
+vector<Feature> ICepstral::features(const vector<vector<double>> &frames) const
 {
-	vector<vector<double>> mixed_features(frames.size(), vector<double>());
+	vector<Feature> mixed_features(frames.size(), Feature{ vector<double>() });
 
-	vector<vector<double>> coeffs;
+	vector<Feature> features(frames.size(), Feature{ vector<double>() });
 	const int offset = q_gain ? 0 : 1;
 	for (int i = 0; i < frames.size(); ++i)
 	{
-		const vector<double> frame_coeffs = coefficients(frames[i]);
-		coeffs.push_back(vector<double>(frame_coeffs.begin() + offset, frame_coeffs.end()));
-		mixed_features[i].insert(mixed_features[i].end(), coeffs.back().begin(), coeffs.back().end());
+		const Feature frame_feature = feature(frames[i]);
+		features[i].coefficients.insert(features[i].coefficients.end(), frame_feature.coefficients.begin() + offset, frame_feature.coefficients.end());
+		mixed_features[i].coefficients.insert(mixed_features[i].coefficients.end(), features[i].coefficients.begin(), features[i].coefficients.end());
 	}
 
 	if (q_delta)
 	{
-		const vector<vector<double>> delta_coeffs = delta(coeffs, x_delta_window);
+		const vector<Feature> delta_features = delta(features, x_delta_window);
 		for (int i = 0; i < frames.size(); ++i)
 		{
-			mixed_features[i].insert(mixed_features[i].end(), delta_coeffs[i].begin(), delta_coeffs[i].end());
+			mixed_features[i].coefficients.insert(mixed_features[i].coefficients.end(), delta_features[i].coefficients.begin(), delta_features[i].coefficients.end());
 		}
 
 		if (q_accel)
 		{
-			const vector<vector<double>> accel_coeffs = delta(delta_coeffs, x_accel_window);
+			const vector<Feature> accel_features = delta(delta_features, x_accel_window);
 			for (int i = 0; i < frames.size(); ++i)
 			{
-				mixed_features[i].insert(mixed_features[i].end(), accel_coeffs[i].begin(), accel_coeffs[i].end());
+				mixed_features[i].coefficients.insert(mixed_features[i].coefficients.end(), accel_features[i].coefficients.begin(), accel_features[i].coefficients.end());
 			}
 		}
 	}
