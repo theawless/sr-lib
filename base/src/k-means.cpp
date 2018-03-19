@@ -7,36 +7,36 @@
 
 using namespace std;
 
-void KMeans::relocate(const vector<int> &indices, vector<vector<double>> &centroids) const
+void KMeans::relocate(const vector<int> &indices, vector<Feature> &centroids) const
 {
 	vector<int> bucket_sizes(centroids.size(), 0);
 
-	centroids = vector<vector<double>>(centroids.size(), vector<double>(centroids[0].size(), 0.0));
+	centroids = vector<Feature>(centroids.size(), Feature{ vector<double>(centroids[0].coefficients.size(), 0.0) });
 	for (int i = 0; i < universe.size(); ++i)
 	{
-		for (int j = 0; j < universe[0].size(); ++j)
+		for (int j = 0; j < universe[0].coefficients.size(); ++j)
 		{
-			centroids[indices[i]][j] += universe[i][j];
+			centroids[indices[i]].coefficients[j] += universe[i].coefficients[j];
 		}
 		bucket_sizes[indices[i]]++;
 	}
 	for (int i = 0; i < centroids.size(); ++i)
 	{
-		for (int j = 0; j < centroids[0].size(); ++j)
+		for (int j = 0; j < centroids[0].coefficients.size(); ++j)
 		{
-			centroids[i][j] /= bucket_sizes[i];
+			centroids[i].coefficients[j] /= bucket_sizes[i];
 		}
 	}
 }
 
-KMeans::KMeans(const std::vector<std::vector<double>> &universe) : universe(universe)
+KMeans::KMeans(const vector<Feature> &universe) : universe(universe)
 {
 }
 
-vector<vector<double>> KMeans::optimise(const std::vector<std::vector<double>> &old_centroids) const
+vector<Feature> KMeans::optimise(const vector<Feature> &old_centroids) const
 {
 	int iteration = 0;
-	vector<vector<double>> centroids = old_centroids;
+	vector<Feature> centroids = old_centroids;
 	pair<double, vector<int>> buckets, new_buckets = classify(centroids);
 
 	do
@@ -52,7 +52,7 @@ vector<vector<double>> KMeans::optimise(const std::vector<std::vector<double>> &
 	return centroids;
 }
 
-pair<double, vector<int>> KMeans::classify(const std::vector<std::vector<double>> &centroids) const
+pair<double, vector<int>> KMeans::classify(const vector<Feature> &centroids) const
 {
 	double distortion = 0.0;
 	vector<int> indices(universe.size(), 0);
@@ -63,7 +63,7 @@ pair<double, vector<int>> KMeans::classify(const std::vector<std::vector<double>
 		int min_j = 0;
 		for (int j = 0; j < centroids.size(); ++j)
 		{
-			const double distance = Maths::distance(universe[i], centroids[j]);
+			const double distance = universe[i].distance(centroids[j]);
 			if (distance < min_distance)
 			{
 				min_distance = distance;
