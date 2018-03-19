@@ -12,7 +12,4 @@ namespace Maths
 
 	/// Find zcr of a vector.
 	int zcr(const std::vector<double> &f);
-
-	/// Find the distance between two vectors.
-	double distance(const std::vector<double> &A, const std::vector<double> &B);
 };

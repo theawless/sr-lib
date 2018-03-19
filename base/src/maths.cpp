@@ -35,16 +35,4 @@ namespace Maths
 
 		return zcr;
 	}
-
-	double distance(const vector<double> &A, const vector<double> &B)
-	{
-		double d = 0.0;
-
-		for (int i = 0; i < A.size() && i < B.size(); ++i)
-		{
-			d += pow((A[i] - B[i]), 2);
-		}
-
-		return d;
-	}
 }
