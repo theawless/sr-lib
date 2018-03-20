@@ -12,14 +12,6 @@
 /// Thanks to https://github.com/progschj/ThreadPool
 class ThreadPool
 {
-private:
-	std::vector<std::thread> workers;
-	std::queue<std::function<void()>> tasks;
-
-	bool stop = false;
-	std::mutex queue_mutex;
-	std::condition_variable condition;
-
 public:
 	/// Constructor.
 	inline ThreadPool(int n_thread)
@@ -81,4 +73,12 @@ public:
 			workers[i].join();
 		}
 	}
+
+private:
+	std::vector<std::thread> workers;
+	std::queue<std::function<void()>> tasks;
+
+	bool stop = false;
+	std::mutex queue_mutex;
+	std::condition_variable condition;
 };
