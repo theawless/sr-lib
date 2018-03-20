@@ -1,19 +1,19 @@
 ﻿#include "model.h"
 
+#include <sstream>
+
 #include "utils.h"
 
 using namespace std;
 
-bool Model::empty() const
+Model::Builder::Builder(int N, int M, int step) :N(N), M(M), step(step)
 {
-	return a.empty();
 }
 
-Model Model::bakis(int N, int M, int step)
+Model Model::Builder::bakis() const
 {
-	Model model;
+	Model model{ vector<vector<double>>(N, vector<double>(N, 0.0)), vector<vector<double>>(N, vector<double>(M, 1.0 / M)), vector<double>(N, 0.0) };
 
-	model.a = vector<vector<double>>(N, vector<double>(N, 0.0));
 	for (int i = 0; i < N - step; ++i)
 	{
 		model.a[i][i] = 1 - step * 0.1;
@@ -30,24 +30,16 @@ Model Model::bakis(int N, int M, int step)
 			model.a[i][i + j + 1] = 0.1;
 		}
 	}
-
-	model.b = vector<vector<double>>(N, vector<double>(M, 1.0 / M));
-
-	model.pi = vector<double>(N, 0.0);
 	model.pi[0] = 1.0;
 
 	return model;
 }
 
-Model Model::merge(const vector<Model> &models)
+Model Model::Builder::merge(const vector<Model> &models) const
 {
-	int M = models[0].b[0].size(), N = models[0].b.size(), Q = models.size();
+	Model model{ vector<vector<double>>(N, vector<double>(N, 0.0)), vector<vector<double>>(N, vector<double>(M, 0.0)), vector<double>(N, 0.0) };
 
-	Model model;
-	model.a = vector<vector<double>>(N, vector<double>(N, 0.0));
-	model.b = vector<vector<double>>(N, vector<double>(M, 0.0));
-	model.pi = vector<double>(N, 0.0);
-
+	int Q = models.size();
 	for (int i = 0; i < Q; ++i)
 	{
 		for (int j = 0; j < N; ++j)
@@ -90,6 +82,11 @@ Model Model::merge(const vector<Model> &models)
 	}
 
 	return model;
+}
+
+bool Model::empty() const
+{
+	return a.empty() || b.empty() || pi.empty();
 }
 
 istream &operator>>(istream &input, Model &model)
