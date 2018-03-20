@@ -10,30 +10,9 @@ using namespace std;
 /// Works with only PCM 16 bit uncompressed little endian wav files.
 class Wav
 {
-private:
-	// RIFF
-	array<char, 4> chunk_id;
-	uint32_t chunk_size;
-	array<char, 4> format;
-
-	// fmt
-	array<char, 4> subchunk1_id;
-	uint32_t subchunk1_size;
-	uint16_t audio_format;
-	uint16_t num_channels;
-	uint32_t sample_rate;
-	uint32_t byte_rate;
-	uint16_t block_align;
-	uint16_t bits_per_sample;
-
-	// data
-	array<char, 4> subchunk2_id;
-	uint32_t subchunk2_size;
-	std::vector<uint16_t> data;
-
 public:
 	/// Constructor.
-	inline Wav(std::string filename)
+	inline Wav(const std::string &filename)
 	{
 		std::ifstream file(filename, std::ios::binary);
 
@@ -69,4 +48,25 @@ public:
 
 		return samples;
 	}
+
+private:
+	// RIFF
+	array<char, 4> chunk_id;
+	uint32_t chunk_size;
+	array<char, 4> format;
+
+	// fmt
+	array<char, 4> subchunk1_id;
+	uint32_t subchunk1_size;
+	uint16_t audio_format;
+	uint16_t num_channels;
+	uint32_t sample_rate;
+	uint32_t byte_rate;
+	uint16_t block_align;
+	uint16_t bits_per_sample;
+
+	// data
+	array<char, 4> subchunk2_id;
+	uint32_t subchunk2_size;
+	std::vector<uint16_t> data;
 };
