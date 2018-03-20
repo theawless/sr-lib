@@ -8,82 +8,46 @@
 
 #include "utils.h"
 
-class Config
+struct Config
 {
-private:
-	const std::string filename;
-
 protected:
 	std::map<std::string, std::string> dict;
 
 public:
-	/// Constructor.
-	Config(std::string filename);
-
-	/// Loads the config.
-	void load();
-
-	/// Saves the config.
-	void save() const;
-
 	/// Gets the value from key.
 	template<typename T>
-	inline T get_val(std::string key, T fail) const
+	inline T get_val(const std::string &key, T fail) const
 	{
 		if (dict.find(key) == dict.end())
 		{
 			return fail;
 		}
+		std::stringstream stream(dict.at(key));
 
-		T val;
-		std::stringstream(dict.at(key)) >> val;
-
-		return val;
+		return Utils::get_item_from_stream<T>(stream);
 	}
 
 	/// Sets the value for key.
 	template<typename T>
-	inline void set_val(std::string key, T val)
+	inline void set_val(const std::string &key, const T &val)
 	{
-		std::stringstream stream;
-		stream << val;
-
-		dict[key] = stream.str();
+		dict[key] = Utils::get_string_from_item<T>(val);
 	}
+
+	/// Operators for loading and saving.
+	friend std::istream &operator>>(std::istream &input, Config &config);
+	friend std::ostream &operator<<(std::ostream &output, const Config &config);
 };
 
-class WordConfig : public Config
+struct WordConfig : public Config
 {
 public:
-	/// Constructor.
-	WordConfig(std::string filename);
-
-	/// Adds word.
-	int add(std::string word);
+	/// Adds word or utterance.
+	int add(const std::string &word);
 
 	/// Get words.
-	std::vector<std::pair<std::string, int>> words() const;
-};
+	std::vector<std::string> words() const;
 
-struct Parameters
-{
-public:
-	const std::string folder;
-	const std::vector<std::pair<std::string, int>> words;
-	const int n_thread;
-	const int x_frame;
-	const int x_overlap;
-	const std::string cepstral;
-	const int n_cepstra;
-	const int n_predict;
-	const bool q_gain;
-	const bool q_delta;
-	const bool q_accel;
-	const int x_codebook;
-	const int n_state;
-	const int n_bakis;
-	const int n_retrain;
-
-	/// Constructor.
-	Parameters(std::string folder, const std::vector<std::pair<std::string, int>> &words, const Config &config);
+	/// Get utterances.
+	std::vector<std::pair<std::string, int>> utterances() const;
 };

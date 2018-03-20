@@ -4,37 +4,33 @@
 
 using namespace std;
 
-Config::Config(string filename) : filename(filename)
+istream &operator>>(istream &input, Config &config)
 {
-}
-
-void Config::load()
-{
-	vector<vector<string>> mat = Utils::get_matrix_from_file<string>(filename, '=');
+	vector<vector<string>> mat = Utils::get_matrix_from_stream<string>(input, '=');
 
 	for (int i = 0; i < mat.size(); ++i)
 	{
-		dict[mat[i][0]] = mat[i][1];
+		config.dict[mat[i][0]] = mat[i][1];
 	}
+
+	return input;
 }
 
-void Config::save() const
+ostream &operator<<(ostream &output, const Config &config)
 {
 	vector<vector<string>> mat;
-	for (map<string, string>::const_iterator it = dict.begin(); it != dict.end(); ++it)
+
+	for (map<string, string>::const_iterator it = config.dict.begin(); it != config.dict.end(); ++it)
 	{
 		vector<string> vec{ it->first, it->second };
 		mat.push_back(vec);
 	}
+	output << Utils::get_string_from_matrix<string>(mat, '=');
 
-	Utils::set_matrix_to_file<string>(mat, filename, '=');
+	return output;
 }
 
-WordConfig::WordConfig(string filename) : Config(filename)
-{
-}
-
-int WordConfig::add(string word)
+int WordConfig::add(const string &word)
 {
 	const int current = get_val<int>(word, 0);
 	set_val<int>(word, current + 1);
@@ -42,23 +38,26 @@ int WordConfig::add(string word)
 	return current;
 }
 
-vector<pair<string, int>> WordConfig::words() const
+vector<string> WordConfig::words() const
+{
+	vector<string> vec;
+
+	for (map<string, string>::const_iterator it = dict.begin(); it != dict.end(); ++it)
+	{
+		vec.push_back(it->first);
+	}
+
+	return vec;
+}
+
+vector<pair<string, int>> WordConfig::utterances() const
 {
 	vector<pair<string, int>> vec;
+
 	for (map<string, string>::const_iterator it = dict.begin(); it != dict.end(); ++it)
 	{
 		vec.push_back(pair<string, int>(it->first, stoi(it->second)));
 	}
 
 	return vec;
-}
-
-Parameters::Parameters(string folder, const vector<pair<string, int>> &words, const Config &config) : folder(folder), words(words),
-n_thread(config.get_val<int>("n_thread", 4 * std::thread::hardware_concurrency())),
-x_frame(config.get_val<int>("x_frame", 300)), x_overlap(config.get_val<int>("x_overlap", 80)),
-cepstral(config.get_val<string>("cepstral", "mfc")), n_cepstra(config.get_val<int>("n_cepstra", 12)), n_predict(config.get_val<int>("n_predict", 12)),
-q_gain(config.get_val<bool>("q_gain", false)), q_delta(config.get_val<bool>("q_delta", false)), q_accel(config.get_val<bool>("q_accel", false)),
-x_codebook(config.get_val<int>("x_codebook", 16)), n_state(config.get_val<int>("n_state", 5)),
-n_bakis(config.get_val<int>("n_bakis", 1)), n_retrain(config.get_val<int>("n_retrain", 3))
-{
 }
