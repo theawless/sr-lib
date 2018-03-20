@@ -19,6 +19,13 @@ public:
 
 class LBG
 {
+public:
+	/// Constructor.
+	LBG(int M);
+
+	/// Call kmeans co-coroutine and split the centroids and repeat till M is reached.
+	Codebook generate(const std::vector<Feature> &universe) const;
+
 private:
 	static constexpr double epsilon = 0.025;
 
@@ -29,11 +36,4 @@ private:
 
 	/// Splits the current codebook into 2.
 	static void split(std::vector<Feature> &centroids);
-
-public:
-	/// Constructor.
-	LBG(int M);
-
-	/// Call kmeans co-coroutine and split the centroids and repeat till M is reached.
-	Codebook generate(const std::vector<Feature> &universe) const;
 };

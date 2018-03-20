@@ -25,6 +25,30 @@ ostream &operator<<(ostream &output, const Codebook &codebook)
 	return output;
 }
 
+LBG::LBG(int M) :
+	M(M)
+{
+}
+
+Codebook LBG::generate(const vector<Feature> &universe) const
+{
+	Codebook codebook;
+
+	int m = 1;
+	const KMeans kmeans(universe);
+	codebook.centroids = vector<Feature>(1, mean(universe));
+	do
+	{
+		m *= 2;
+		Logger::log("LBG: m is:", m);
+
+		split(codebook.centroids);
+		codebook.centroids = kmeans.optimise(codebook.centroids);
+	} while (m < M);
+
+	return codebook;
+}
+
 Feature LBG::mean(const vector<Feature> &universe)
 {
 	Feature mean{ vector<double>(universe[0].coefficients.size(), 0.0) };
@@ -57,27 +81,4 @@ void LBG::split(vector<Feature> &centroids)
 			centroids[i].coefficients[j] += epsilon;
 		}
 	}
-}
-
-LBG::LBG(int M) : M(M)
-{
-}
-
-Codebook LBG::generate(const vector<Feature> &universe) const
-{
-	Codebook codebook;
-
-	int m = 1;
-	const KMeans kmeans(universe);
-	codebook.centroids = vector<Feature>(1, mean(universe));
-	do
-	{
-		m *= 2;
-		Logger::log("LBG: m is:", m);
-
-		split(codebook.centroids);
-		codebook.centroids = kmeans.optimise(codebook.centroids);
-	} while (m < M);
-
-	return codebook;
 }
