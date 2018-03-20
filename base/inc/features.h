@@ -18,6 +18,16 @@ public:
 
 class ICepstral
 {
+public:
+	/// Constructor.
+	ICepstral(int n_cepstral, bool q_gain, bool q_delta, bool q_accel);
+
+	/// Gets the features.
+	std::vector<Feature> features(const std::vector<std::vector<double>> &frames) const;
+
+protected:
+	const int n_cepstra;
+
 private:
 	static constexpr int x_delta_window = 3;
 	static constexpr int x_accel_window = 1;
@@ -31,14 +41,4 @@ private:
 
 	/// Gets delta features with given transgression window.
 	static std::vector<Feature> delta(const std::vector<Feature> &features, int W);
-
-protected:
-	const int n_cepstra;
-
-public:
-	/// Constructor.
-	ICepstral(int n_cepstral, bool q_gain, bool q_delta, bool q_accel);
-
-	/// Gets the features.
-	std::vector<Feature> features(const std::vector<std::vector<double>> &frames) const;
 };

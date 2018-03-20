@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cmath>
 #include <complex>
 #include <map>
 #include <vector>
@@ -10,6 +9,10 @@
 /// Thanks to https://github.com/dspavankumar/compute-mfcc
 class MFC : public ICepstral
 {
+public:
+	/// Constructor.
+	MFC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel);
+
 private:
 	static constexpr int n_fft = 512;
 	static constexpr double hz_low = 50;
@@ -48,8 +51,4 @@ private:
 
 	/// Balance the coefficients by subtracting mean.
 	void normalise(std::vector<double> &C) const;
-
-public:
-	/// Constructor.
-	MFC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel);
 };

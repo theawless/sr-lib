@@ -7,6 +7,11 @@
 
 using namespace std;
 
+MFC::MFC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel) : ICepstral(n_cepstra, q_gain, q_delta, q_accel),
+twiddle(setup_twiddle()), filter_bank(setup_filter_bank()), dct_matrix(setup_dct_matrix(n_cepstra))
+{
+}
+
 map<int, map<int, complex<double>>> MFC::setup_twiddle()
 {
 	map<int, map<int, complex<double>>> twiddle;
@@ -30,8 +35,8 @@ vector<vector<double>> MFC::setup_filter_bank()
 
 	// calculate filter centre-frequencies
 	vector<double> hz_filter_center(n_filters + 2, 0.0);
-	function<double(double)> hertz2mel = [](double hz) { return 2595 * log10(1 + hz / 700); };
-	function<double(double)> mel2hertz = [](double mel) { return 700 * (pow(10, mel / 2595) - 1); };
+	const function<double(double)> hertz2mel = [](double hz) { return 2595 * log10(1 + hz / 700); };
+	const function<double(double)> mel2hertz = [](double mel) { return 700 * (pow(10, mel / 2595) - 1); };
 	const double low_mel = hertz2mel(hz_low);
 	const double high_mel = hertz2mel(hz_high);
 	for (int i = 0; i < n_filters + 2; ++i)
@@ -87,12 +92,14 @@ vector<vector<double>> MFC::setup_dct_matrix(int n_cepstra)
 
 Feature MFC::feature(const vector<double> &frame) const
 {
+	Feature feature;
+
 	const vector<double> P = power_spectrum(frame);
 	const vector<double> H = lmfb(P);
-	vector<double> C = dct(H);
-	normalise(C);
+	feature.coefficients = dct(H);
+	normalise(feature.coefficients);
 
-	return Feature{ C };
+	return feature;
 }
 
 vector<double> MFC::power_spectrum(const vector<double> &frame) const
@@ -118,31 +125,28 @@ vector<complex<double>> MFC::fft(const vector<complex<double>> &x) const
 		return x;
 	}
 
-	vector<complex<double>> xe(N / 2, 0.0), xo(N / 2, 0.0);
-	for (int i = 0; i < N; i += 2)
-	{
-		// even indices
-		xe[i / 2] = x[i];
-	}
-	for (int i = 1; i < N; i += 2)
-	{
-		// odd indices
-		xo[(i - 1) / 2] = x[i];
-	}
+	vector<complex<double>> X;
 
 	// compute N/2-point FFT
-	vector<complex<double>> Xjo = fft(xe), Xjo2 = fft(xo);
-	Xjo.insert(Xjo.end(), Xjo2.begin(), Xjo2.end());
+	vector<complex<double>> xe(N / 2, 0.0), xo(N / 2, 0.0);
+	for (int i = 0; i < N / 2; ++i)
+	{
+		xe[i] = x[2 * i];
+		xo[i] = x[2 * i + 1];
+	}
+	const vector<complex<double>> Xe = fft(xe), Xo = fft(xo);
+	X.insert(X.end(), Xe.begin(), Xe.end());
+	X.insert(X.end(), Xo.begin(), Xo.end());
 
 	// butterfly computations
 	for (int i = 0; i <= N / 2 - 1; ++i)
 	{
-		const complex<double> t = Xjo[i], tw = twiddle.at(N).at(i);
-		Xjo[i] = t + tw * Xjo[i + N / 2];
-		Xjo[i + N / 2] = t - tw * Xjo[i + N / 2];
+		const complex<double> t = X[i], tw = twiddle.at(N).at(i);
+		X[i] = t + tw * X[i + N / 2];
+		X[i + N / 2] = t - tw * X[i + N / 2];
 	}
 
-	return Xjo;
+	return X;
 }
 
 vector<double> MFC::lmfb(const vector<double> &P) const
@@ -186,9 +190,4 @@ void MFC::normalise(vector<double> &C) const
 	{
 		C[i] -= mean_C;
 	}
-}
-
-MFC::MFC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel) : ICepstral(n_cepstra, q_gain, q_delta, q_accel),
-twiddle(setup_twiddle()), filter_bank(setup_filter_bank()), dct_matrix(setup_dct_matrix(n_cepstra))
-{
 }

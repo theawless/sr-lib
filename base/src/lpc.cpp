@@ -1,9 +1,13 @@
 #include "lpc.h"
 
 #include <cmath>
-#include <numeric>
 
 using namespace std;
+
+LPC::LPC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel, int n_predict) : ICepstral(n_cepstra, q_gain, q_delta, q_accel),
+n_predict(n_predict), sine_coefficients(setup_sine_coefficients(n_cepstra))
+{
+}
 
 vector<double> LPC::setup_sine_coefficients(int n_cepstra)
 {
@@ -20,13 +24,15 @@ vector<double> LPC::setup_sine_coefficients(int n_cepstra)
 
 Feature LPC::feature(const vector<double> &frame) const
 {
+	Feature feature;
+
 	const vector<double> R = auto_correlation(frame);
 	const vector<double> A = durbin_solve(R);
 	const double G_squared = gain(R, A);
-	vector<double> C = cepstral_coefficients(G_squared, A);
-	sine_window(C);
+	feature.coefficients = cepstral_coefficients(G_squared, A);
+	sine_window(feature.coefficients);
 
-	return Feature{ C };
+	return feature;
 }
 
 vector<double> LPC::auto_correlation(const vector<double> &frame) const
@@ -116,9 +122,4 @@ void LPC::sine_window(vector<double> &C) const
 	{
 		C[i] *= sine_coefficients[i];
 	}
-}
-
-LPC::LPC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel, int n_predict) : ICepstral(n_cepstra, q_gain, q_delta, q_accel),
-n_predict(n_predict), sine_coefficients(setup_sine_coefficients(n_cepstra))
-{
 }

@@ -32,27 +32,6 @@ ostream &operator<<(ostream &output, const Feature &feature)
 	return output;
 }
 
-vector<Feature> ICepstral::delta(const vector<Feature> &features, int W)
-{
-	vector<Feature> delta(features);
-
-	const double denominator = W * (2.0 * W + 1.0) * (W + 1.0) / 3.0 - pow(W, 2);
-	for (int i = W; i < features.size() - W; ++i)
-	{
-		for (int j = 0; j < features[0].coefficients.size(); ++j)
-		{
-			double numerator = 0.0;
-			for (int k = -W; k <= W; ++k)
-			{
-				numerator += k * features[k + i].coefficients[j];
-			}
-			delta[i].coefficients[j] = numerator / denominator;
-		}
-	}
-
-	return delta;
-}
-
 ICepstral::ICepstral(int n_cepstra, bool q_gain, bool q_delta, bool q_accel)
 	:n_cepstra(n_cepstra), q_gain(q_gain), q_delta(q_delta), q_accel(q_accel)
 {
@@ -90,4 +69,25 @@ vector<Feature> ICepstral::features(const vector<vector<double>> &frames) const
 	}
 
 	return mixed_features;
+}
+
+vector<Feature> ICepstral::delta(const vector<Feature> &features, int W)
+{
+	vector<Feature> delta = features;
+
+	const double denominator = W * (2.0 * W + 1.0) * (W + 1.0) / 3.0 - pow(W, 2);
+	for (int i = W; i < features.size() - W; ++i)
+	{
+		for (int j = 0; j < features[0].coefficients.size(); ++j)
+		{
+			double numerator = 0.0;
+			for (int k = -W; k <= W; ++k)
+			{
+				numerator += k * features[k + i].coefficients[j];
+			}
+			delta[i].coefficients[j] = numerator / denominator;
+		}
+	}
+
+	return delta;
 }
