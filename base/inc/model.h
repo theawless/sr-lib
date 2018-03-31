@@ -12,10 +12,10 @@ public:
 		/// Constuctor.
 		Builder(int N, int M, int step);
 
-		/// Gets a feed forward model.
+		/// Get a feed forward model.
 		Model bakis() const;
 
-		/// Merges the given models.
+		/// Merge the given models.
 		Model merge(const std::vector<Model> &models) const;
 
 	private:
@@ -28,7 +28,7 @@ public:
 	std::vector<std::vector<double>> b;
 	std::vector<double> pi;
 
-	/// Returns whether the model is empty.
+	/// Return whether empty.
 	bool empty() const;
 
 	/// Operators for loading and saving.

@@ -9,7 +9,7 @@
 
 namespace Utils
 {
-	/// Gets the item from the stream.
+	/// Get the item from the stream.
 	template <typename T>
 	inline T get_item_from_stream(std::istream &stream)
 	{
@@ -19,7 +19,7 @@ namespace Utils
 		return item;
 	}
 
-	/// Sets the item to a string form.
+	/// Set the item to a string form.
 	template <typename T>
 	inline std::string get_string_from_item(const T &item)
 	{
@@ -31,7 +31,7 @@ namespace Utils
 		return stream.str();
 	}
 
-	/// Gets the vector from the stream.
+	/// Get the vector from the stream.
 	template <typename T>
 	inline std::vector<T> get_vector_from_stream(std::istream &stream, char delim = ',')
 	{
@@ -47,13 +47,13 @@ namespace Utils
 		return vec;
 	}
 
-	/// Sets the vector to a string form.
+	/// Set the vector to a string form.
 	template <typename T>
 	inline std::string get_string_from_vector(const std::vector<T> &vec, char delim = ',')
 	{
 		if (vec.empty())
 		{
-			return "";
+			return string();
 		}
 
 		std::stringstream stream;
@@ -67,7 +67,7 @@ namespace Utils
 		return stream.str();
 	}
 
-	/// Gets the matrix from the stream.
+	/// Get the matrix from the stream.
 	template <typename T>
 	inline std::vector<std::vector<T>> get_matrix_from_stream(std::istream &stream, char delim_token = ',', char delim_line = '\n')
 	{
@@ -83,13 +83,13 @@ namespace Utils
 		return mat;
 	}
 
-	/// Sets the matrix to a string form.
+	/// Set the matrix to a string form.
 	template <typename T>
 	inline std::string get_string_from_matrix(const std::vector<std::vector<T>> &mat, char delim_token = ',', char delim_line = '\n')
 	{
 		if (mat.empty())
 		{
-			return "";
+			return string();
 		}
 
 		std::stringstream stream;
@@ -103,7 +103,7 @@ namespace Utils
 		return stream.str();
 	}
 
-	/// Gets the item from the given file.
+	/// Get the item from the given file.
 	template <typename T>
 	inline T get_item_from_file(const std::string &filename)
 	{
@@ -112,7 +112,7 @@ namespace Utils
 		return get_item_from_stream<T>(stream);
 	}
 
-	/// Sets the item to the given file.
+	/// Set the item to the given file.
 	template <typename T>
 	inline void set_item_to_file(const T &item, const std::string &filename)
 	{
@@ -121,7 +121,7 @@ namespace Utils
 		stream << get_string_from_item<T>(item);
 	}
 
-	/// Gets the vector from the given file.
+	/// Get the vector from the given file.
 	template <typename T>
 	inline std::vector<T> get_vector_from_file(const std::string &filename, char delim = '\n')
 	{
@@ -130,7 +130,7 @@ namespace Utils
 		return get_vector_from_stream<T>(stream, delim);
 	}
 
-	/// Sets the vector to the given file.
+	/// Set the vector to the given file.
 	template <typename T>
 	inline void set_vector_to_file(const std::vector<T> &vec, const std::string &filename, char delim = '\n')
 	{
@@ -139,7 +139,7 @@ namespace Utils
 		stream << get_string_from_vector<T>(vec, delim);
 	}
 
-	/// Gets the matrix from the given file.
+	/// Get the matrix from the given file.
 	template <typename T>
 	inline std::vector<std::vector<T>> get_matrix_from_file(const std::string &filename, char delim_token = ',', char delim_line = '\n')
 	{
@@ -148,7 +148,7 @@ namespace Utils
 		return get_matrix_from_stream<T>(stream, delim_token, delim_line);
 	}
 
-	/// Sets the matrix to the given file.
+	/// Set the matrix to the given file.
 	template <typename T>
 	inline void set_matrix_to_file(const std::vector<std::vector<T>> &mat, const std::string &filename, char delim_token = ',', char delim_line = '\n')
 	{

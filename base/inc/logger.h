@@ -7,7 +7,7 @@
 /// Thanks to https://stackoverflow.com/questions/27375089/what-is-the-easiest-way-to-print-a-variadic-parameter-pack-using-stdostream
 namespace Logger
 {
-	/// Logs the args in the standard output.
+	/// Print the args in the standard output.
 	template<typename... Args>
 	inline void info(Args... args)
 	{
@@ -18,7 +18,7 @@ namespace Logger
 		std::cout.flush();
 	}
 
-	/// Logs the args in the log output.
+	/// Print the args in the log output.
 	template<typename... Args>
 	inline void log(Args... args)
 	{
@@ -31,7 +31,7 @@ namespace Logger
 #endif
 	}
 
-	/// Prints the args in the given stream.
+	/// Print the args in the given stream.
 	template <typename Arg, typename... Args>
 	static inline void unpack(std::ostream& out, Arg&& arg, Args&&... args)
 	{

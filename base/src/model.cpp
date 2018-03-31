@@ -6,7 +6,8 @@
 
 using namespace std;
 
-Model::Builder::Builder(int N, int M, int step) :N(N), M(M), step(step)
+Model::Builder::Builder(int N, int M, int step) :
+	N(N), M(M), step(step)
 {
 }
 
@@ -101,14 +102,14 @@ istream &operator>>(istream &input, Model &model)
 	}
 	model.pi = Utils::get_vector_from_stream<double>(stream);
 
-	input.get(); stream.str(""); stream.clear();
+	input.get(); stream.str(string()); stream.clear();
 	while (input.get(c) && c != 'b')
 	{
 		stream << c;
 	}
 	model.a = Utils::get_matrix_from_stream<double>(stream);
 
-	input.get(); stream.str(""); stream.clear();
+	input.get(); stream.str(string()); stream.clear();
 	while (input.get(c))
 	{
 		stream << c;

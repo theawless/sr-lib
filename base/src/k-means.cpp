@@ -6,7 +6,8 @@
 
 using namespace std;
 
-KMeans::KMeans(const vector<Feature> &universe) : universe(universe)
+KMeans::KMeans(const vector<Feature> &universe) :
+	universe(universe)
 {
 }
 
@@ -31,7 +32,7 @@ vector<Feature> KMeans::optimise(const vector<Feature> &old_centroids) const
 
 pair<double, vector<int>> KMeans::classify(const vector<Feature> &centroids) const
 {
-	pair<double, vector<int>> buckets(0, vector<int>(universe.size(), 0));
+	pair<double, vector<int>> buckets(0.0, vector<int>(universe.size(), 0));
 
 	for (int i = 0; i < universe.size(); ++i)
 	{
