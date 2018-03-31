@@ -6,6 +6,11 @@
 
 using namespace std;
 
+bool Codebook::empty() const
+{
+	return centroids.empty();
+}
+
 vector<int> Codebook::observations(const vector<Feature> &features) const
 {
 	return KMeans(features).classify(centroids).second;
@@ -25,8 +30,8 @@ ostream &operator<<(ostream &output, const Codebook &codebook)
 	return output;
 }
 
-LBG::LBG(int M) :
-	M(M)
+LBG::LBG(int x_codebook) :
+	x_codebook(x_codebook)
 {
 }
 
@@ -44,7 +49,7 @@ Codebook LBG::generate(const vector<Feature> &universe) const
 
 		split(codebook.centroids);
 		codebook.centroids = kmeans.optimise(codebook.centroids);
-	} while (m < M);
+	} while (m < x_codebook);
 
 	return codebook;
 }

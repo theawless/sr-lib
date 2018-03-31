@@ -9,7 +9,10 @@ struct Codebook
 public:
 	std::vector<Feature> centroids;
 
-	/// Find the indexes of observation sequence of observations in codebook.
+	/// Return whether empty.
+	bool empty() const;
+
+	/// Find the buckets where the features lie in codebook.
 	std::vector<int> observations(const std::vector<Feature> &features) const;
 
 	/// Operators for loading and saving.
@@ -21,19 +24,19 @@ class LBG
 {
 public:
 	/// Constructor.
-	LBG(int M);
+	LBG(int x_codebook);
 
-	/// Call kmeans co-coroutine and split the centroids and repeat till M is reached.
+	/// Call Kmeans co-coroutine and split the centroids and till codebook size is reached.
 	Codebook generate(const std::vector<Feature> &universe) const;
 
 private:
 	static constexpr double epsilon = 0.025;
 
-	const int M;
+	const int x_codebook;
 
-	/// Finds the initial mean of the universe. This is the first centroid.
+	/// Find the initial centroid of the universe.
 	static Feature mean(const std::vector<Feature> &universe);
 
-	/// Splits the current codebook into 2.
+	/// Split the given centroids.
 	static void split(std::vector<Feature> &centroids);
 };
