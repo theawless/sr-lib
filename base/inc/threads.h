@@ -14,32 +14,12 @@ class ThreadPool
 {
 public:
 	/// Constructor.
-	inline ThreadPool(int n_thread)
+	inline ThreadPool(int n_thread) :
+		workers(), tasks(), stop(), queue_mutex(), condition()
 	{
 		for (int i = 0; i < n_thread; ++i)
 		{
-			workers.emplace_back
-			(
-				[this]
-			{
-				while (true)
-				{
-					std::function<void()> task;
-					{
-						std::unique_lock<std::mutex> lock(this->queue_mutex);
-						this->condition.wait(lock, [this] { return this->stop || !this->tasks.empty(); });
-						if (this->stop && this->tasks.empty())
-						{
-							return;
-						}
-						task = std::move(this->tasks.front());
-						this->tasks.pop();
-					}
-
-					task();
-				}
-			}
-			);
+			workers.push_back(std::move(std::thread(&ThreadPool::worker, this)));
 		}
 	}
 
@@ -48,8 +28,7 @@ public:
 	inline std::future<typename std::result_of<F(Args...)>::type> enqueue(F&& f, Args&&... args)
 	{
 		using return_type = typename std::result_of<F(Args...)>::type;
-
-		auto task = std::make_shared<std::packaged_task<return_type()>>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
+		std::shared_ptr<std::packaged_task<return_type()>> task(new std::packaged_task<return_type()>(std::bind(std::forward<F>(f), std::forward<Args>(args)...)));
 		std::future<return_type> res = task->get_future();
 		{
 			std::unique_lock<std::mutex> lock(queue_mutex);
@@ -78,7 +57,33 @@ private:
 	std::vector<std::thread> workers;
 	std::queue<std::function<void()>> tasks;
 
-	bool stop = false;
+	bool stop;
 	std::mutex queue_mutex;
 	std::condition_variable condition;
+
+	/// Indefinitely fetch tasks from the queue.
+	void worker()
+	{
+		while (true)
+		{
+			std::function<void()> task;
+			{
+				std::unique_lock<std::mutex> lock(queue_mutex);
+				const std::function<bool()> pred = [&]()
+				{
+					return stop || !tasks.empty();
+				};
+				condition.wait(lock, pred);
+				if (stop && tasks.empty())
+				{
+					return;
+				}
+
+				task = std::move(tasks.front());
+				tasks.pop();
+			}
+
+			task();
+		}
+	}
 };
