@@ -8,7 +8,7 @@ struct Feature
 public:
 	std::vector<double> coefficients;
 
-	/// Find the distance with feature.
+	/// Find the distance with another feature.
 	double distance(const Feature &feature) const;
 
 	/// Operators for loading and saving.
@@ -22,7 +22,7 @@ public:
 	/// Constructor.
 	ICepstral(int n_cepstral, bool q_gain, bool q_delta, bool q_accel);
 
-	/// Gets the features.
+	/// Get the features.
 	std::vector<Feature> features(const std::vector<std::vector<double>> &frames) const;
 
 protected:
@@ -39,6 +39,6 @@ private:
 	/// Subclasses will return coefficients for a frame.
 	virtual Feature feature(const std::vector<double> &frame) const = 0;
 
-	/// Gets delta features with given transgression window.
+	/// Get delta features with given transgression window.
 	static std::vector<Feature> delta(const std::vector<Feature> &features, int W);
 };

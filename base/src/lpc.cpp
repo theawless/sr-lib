@@ -4,8 +4,8 @@
 
 using namespace std;
 
-LPC::LPC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel, int n_predict) : ICepstral(n_cepstra, q_gain, q_delta, q_accel),
-n_predict(n_predict), sine_coefficients(setup_sine_coefficients(n_cepstra))
+LPC::LPC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel, int n_predict) :
+	ICepstral(n_cepstra, q_gain, q_delta, q_accel), n_predict(n_predict), sine_coefficients(setup_sine_coefficients(n_cepstra))
 {
 }
 
@@ -41,7 +41,7 @@ vector<double> LPC::auto_correlation(const vector<double> &frame) const
 
 	for (int i = 0; i < n_predict + 1; ++i)
 	{
-		for (int j = 0; j < frame.size() - i; ++j)
+		for (int j = 0; j < (int)frame.size() - i; ++j)
 		{
 			R[i] += frame[j] * frame[j + i];
 		}

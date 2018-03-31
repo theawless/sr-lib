@@ -11,19 +11,19 @@ public:
 	LPC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel, int n_predict);
 
 private:
-	const int n_predict;
 	const std::vector<double> sine_coefficients;
+	const int n_predict;
 
 	/// Compute sine coefficients
 	static std::vector<double> setup_sine_coefficients(int n_cepstra);
 
-	/// Find lpcc for given frame.
+	/// Find the lpcc features for given frame.
 	Feature feature(const std::vector<double> &frame) const;
 
-	/// Find autocorrelation of a vector.
+	/// Find autocorrelation of a fram.
 	std::vector<double> auto_correlation(const std::vector<double> &frame) const;
 
-	/// Levinson Durbin algorithm (Toeplitz matrix solver)
+	/// Levinson Durbin algorithm.
 	std::vector<double> durbin_solve(const std::vector<double> &R) const;
 
 	/// Find the gain.

@@ -32,8 +32,8 @@ ostream &operator<<(ostream &output, const Feature &feature)
 	return output;
 }
 
-ICepstral::ICepstral(int n_cepstra, bool q_gain, bool q_delta, bool q_accel)
-	:n_cepstra(n_cepstra), q_gain(q_gain), q_delta(q_delta), q_accel(q_accel)
+ICepstral::ICepstral(int n_cepstra, bool q_gain, bool q_delta, bool q_accel) :
+	n_cepstra(n_cepstra), q_gain(q_gain), q_delta(q_delta), q_accel(q_accel)
 {
 }
 
@@ -76,7 +76,7 @@ vector<Feature> ICepstral::delta(const vector<Feature> &features, int W)
 	vector<Feature> delta = features;
 
 	const double denominator = W * (2.0 * W + 1.0) * (W + 1.0) / 3.0 - pow(W, 2);
-	for (int i = W; i < features.size() - W; ++i)
+	for (int i = W; i < (int)features.size() - W; ++i)
 	{
 		for (int j = 0; j < features[0].coefficients.size(); ++j)
 		{
