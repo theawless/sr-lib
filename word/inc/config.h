@@ -1,9 +1,9 @@
 #pragma once
 
 #include <map>
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <tuple>
 #include <vector>
 
 #include "utils.h"
@@ -14,40 +14,54 @@ protected:
 	std::map<std::string, std::string> dict;
 
 public:
-	/// Gets the value from key.
+	/// Get the value from key.
 	template<typename T>
-	inline T get_val(const std::string &key, T fail) const
+	inline T get_val(const std::string &key, const T &fail) const
 	{
-		if (dict.find(key) == dict.end())
-		{
-			return fail;
-		}
-		std::stringstream stream(dict.at(key));
+		T val = fail;
 
-		return Utils::get_item_from_stream<T>(stream);
+		if (dict.find(key) != dict.end())
+		{
+			std::stringstream stream(dict.at(key));
+			stream << std::boolalpha;
+			val = Utils::get_item_from_stream<T>(stream);
+		}
+
+		return val;
 	}
 
-	/// Sets the value for key.
+	/// Set the value for key.
 	template<typename T>
 	inline void set_val(const std::string &key, const T &val)
 	{
 		dict[key] = Utils::get_string_from_item<T>(val);
 	}
 
-	/// Operators for loading and saving.
-	friend std::istream &operator>>(std::istream &input, Config &config);
-	friend std::ostream &operator<<(std::ostream &output, const Config &config);
-};
+	/// Operator for loading.
+	friend std::istream &operator>>(std::istream &input, Config &config)
+	{
+		std::vector<std::vector<std::string>> mat = Utils::get_matrix_from_stream<std::string>(input, '=');
 
-struct WordConfig : public Config
-{
-public:
-	/// Adds word or utterance.
-	int add(const std::string &word);
+		for (int i = 0; i < mat.size(); ++i)
+		{
+			config.dict[mat[i][0]] = mat[i][1];
+		}
 
-	/// Get words.
-	std::vector<std::string> words() const;
+		return input;
+	}
 
-	/// Get utterances.
-	std::vector<std::pair<std::string, int>> utterances() const;
+	/// Operator for saving.
+	friend std::ostream &operator<<(std::ostream &output, const Config &config)
+	{
+		std::vector<std::vector<std::string>> mat;
+
+		for (std::map<std::string, std::string>::const_iterator it = config.dict.begin(); it != config.dict.end(); ++it)
+		{
+			std::vector<std::string> vec{ it->first, it->second };
+			mat.push_back(vec);
+		}
+		output << Utils::get_string_from_matrix<std::string>(mat, '=');
+
+		return output;
+	}
 };
