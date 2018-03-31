@@ -7,3 +7,4 @@ C++ Automatic Speech Recognition library for my [BTech Project](https://github.c
 * Mel Filter Cepstral Coefficients (MFCC)
 * Vector Quantisation (VQ) - LBG, KMeans
 * Hidden Markov Model (HMM) - Baum–Welch, Viterbi
+* DFA and nGram Prediction
