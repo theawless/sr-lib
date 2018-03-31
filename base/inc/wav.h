@@ -1,3 +1,5 @@
+#pragma once
+
 #include <array>
 #include <fstream>
 #include <ios>
@@ -12,9 +14,16 @@ class Wav
 {
 public:
 	/// Constructor.
-	inline Wav(const std::string &filename)
+	inline Wav(const std::string &filename) :
+		chunk_id(), chunk_size(), format(),
+		subchunk1_id(), subchunk1_size(), audio_format(), num_channels(), sample_rate(), byte_rate(), block_align(), bits_per_sample(),
+		subchunk2_id(), subchunk2_size(), data()
 	{
 		std::ifstream file(filename, std::ios::binary);
+		if (!file.good())
+		{
+			return;
+		}
 
 		file.read(reinterpret_cast<char *>(&chunk_id[0]), chunk_id.size() * sizeof(chunk_id[0]));
 		file.read(reinterpret_cast<char *>(&chunk_size), sizeof(chunk_size));
@@ -36,11 +45,12 @@ public:
 		file.read(reinterpret_cast<char *>(&data[0]), data.size() * sizeof(data[0]));
 	}
 
-	/// Gets the samples as type.
+	/// Get the samples.
 	template <typename T>
 	inline std::vector<T> samples() const
 	{
 		std::vector<T> samples;
+
 		for (int i = 0; i < data.size(); ++i)
 		{
 			samples.push_back(0x8000 & data[i] ? static_cast<int>((0x7FFF & data[i])) - 0x8000 : data[i]);
