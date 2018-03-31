@@ -7,7 +7,8 @@
 
 using namespace std;
 
-HMM::HMM(const Model &lambda) : lambda(lambda)
+HMM::HMM(const Model &lambda) :
+	lambda(lambda)
 {
 }
 
@@ -17,7 +18,7 @@ Model HMM::optimise(const vector<int> &o)
 	double old_P_star, P_star;
 
 	tweak();
-	P_star = viterbi_logged(o).first;
+	P_star = viterbi(o).first;
 	do
 	{
 		iteration += 1;
@@ -26,7 +27,7 @@ Model HMM::optimise(const vector<int> &o)
 
 		restimate(o);
 		tweak();
-		P_star = viterbi_logged(o).first;
+		P_star = viterbi(o).first;
 	} while (P_star / old_P_star > convergence_threshold && iteration < convergence_max_iterations);
 
 	return lambda;
@@ -37,9 +38,16 @@ pair<double, vector<vector<double>>> HMM::forward(const vector<int> &o) const
 	const int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
 	pair<double, vector<vector<double>>> alpha(0.0, vector<vector<double>>(T, vector<double>(N, 0.0)));
 
+	vector<double> C(T, 0.0);
 	for (int i = 0; i < N; ++i)
 	{
 		alpha.second[0][i] = lambda.pi[i] * lambda.b[i][o[0]];
+		C[0] += alpha.second[0][i];
+	}
+	C[0] = 1 / C[0];
+	for (int i = 0; i < N; ++i)
+	{
+		alpha.second[0][i] *= C[0];
 	}
 	for (int t = 0; t < T - 1; ++t)
 	{
@@ -50,54 +58,18 @@ pair<double, vector<vector<double>>> HMM::forward(const vector<int> &o) const
 				alpha.second[t + 1][i] += alpha.second[t][j] * lambda.a[j][i];
 			}
 			alpha.second[t + 1][i] *= lambda.b[i][o[t + 1]];
+			C[t + 1] += alpha.second[t + 1][i];
 		}
-	}
-
-	for (int i = 0; i < N; ++i)
-	{
-		alpha.first += alpha.second[T - 1][i];
-	}
-
-	return alpha;
-}
-
-pair<double, vector<vector<double>>> HMM::forward_scaled(const vector<int> &o) const
-{
-	const int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
-	pair<double, vector<vector<double>>> alpha(0.0, vector<vector<double>>(T, vector<double>(N, 0.0)));
-
-	double C = 0.0;
-	for (int i = 0; i < N; ++i)
-	{
-		alpha.second[0][i] = lambda.pi[i] * lambda.b[i][o[0]];
-		C += alpha.second[0][i];
-	}
-	for (int i = 0; i < N; ++i)
-	{
-		alpha.second[0][i] /= C;
-	}
-
-	for (int t = 0; t < T - 1; ++t)
-	{
-		double C = 0.0;
+		C[t + 1] = 1 / C[t + 1];
 		for (int i = 0; i < N; ++i)
 		{
-			for (int j = 0; j < N; ++j)
-			{
-				alpha.second[t + 1][i] += alpha.second[t][j] * lambda.a[j][i];
-			}
-			alpha.second[t + 1][i] *= lambda.b[i][o[t + 1]];
-			C += alpha.second[t + 1][i];
-		}
-		for (int i = 0; i < N; ++i)
-		{
-			alpha.second[t + 1][i] /= C;
+			alpha.second[t + 1][i] *= C[t + 1];
 		}
 	}
 
-	for (int i = 0; i < N; ++i)
+	for (int t = 0; t < T; ++t)
 	{
-		alpha.first += alpha.second[T - 1][i];
+		alpha.first -= log(C[t]);
 	}
 
 	return alpha;
@@ -120,7 +92,7 @@ void HMM::tweak()
 		int count = 0;
 		for (int j = 0; j < N; ++j)
 		{
-			if (lambda.a[i][j] == 0)
+			if (lambda.a[i][j] == 0.0)
 			{
 				lambda.a[i][j] = dummy;
 				count++;
@@ -150,7 +122,7 @@ void HMM::tweak()
 		int count = 0;
 		for (int j = 0; j < M; ++j)
 		{
-			if (lambda.b[i][j] == 0)
+			if (lambda.b[i][j] == 0.0)
 			{
 				lambda.b[i][j] = dummy;
 				count++;
@@ -173,58 +145,17 @@ pair<double, vector<int>> HMM::viterbi(const vector<int> &o) const
 	const int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
 	pair<double, vector<int>> q(0.0, vector<int>(T, 0));
 
-	vector<vector<double>> delta(T, vector<double>(N, 0.0));
-	for (int i = 0; i < N; ++i)
-	{
-		delta[0][i] = lambda.pi[i] * lambda.b[i][o[0]];
-	}
-
 	vector<int> psi(T, 0);
-	for (int t = 0; t < T - 1; ++t)
-	{
-		for (int i = 0; i < N; ++i)
-		{
-			delta[t + 1][i] = numeric_limits<double>::min();
-			for (int j = 0; j < N; ++j)
-			{
-				double current_max_delta = delta[t][j] * lambda.a[j][i];
-				if (delta[t + 1][i] < current_max_delta)
-				{
-					delta[t + 1][i] = current_max_delta;
-					psi[i] = j;
-				}
-			}
-			delta[t + 1][i] *= lambda.b[i][o[t + 1]];
-		}
-	}
-
-	q.second[T - 1] = max_element(delta[T - 1].begin(), delta[T - 1].end()) - delta[T - 1].begin();
-	q.first = delta[T - 1][q.second[T - 1]];
-	for (int i = T - 2; i >= 0; --i)
-	{
-		q.second[i] = psi[q.second[i + 1]];
-	}
-
-	return q;
-}
-
-pair<double, vector<int>> HMM::viterbi_logged(const vector<int> &o) const
-{
-	const int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
-	pair<double, vector<int>> q(0.0, vector<int>(T, 0));
-
 	vector<vector<double>> delta(T, vector<double>(N, 0.0));
 	for (int i = 0; i < N; ++i)
 	{
 		double temp = lambda.pi[i];
-		if (temp == 0)
+		if (temp == 0.0)
 		{
 			temp = minimum_probability;
 		}
 		delta[0][i] = log(temp) + log(lambda.b[i][o[0]]);
 	}
-
-	vector<int> psi(T, 0);
 	for (int t = 0; t < T - 1; ++t)
 	{
 		for (int i = 0; i < N; ++i)
@@ -258,9 +189,16 @@ vector<vector<double>> HMM::backward(const vector<int> &o) const
 	const int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
 	vector<vector<double>> beta(T, vector<double>(N, 0.0));
 
+	vector<double> C(T, 0.0);
 	for (int i = 0; i < N; ++i)
 	{
 		beta[T - 1][i] = 1;
+		C[0] += beta[T - 1][i];
+	}
+	C[0] = 1 / C[0];
+	for (int i = 0; i < N; ++i)
+	{
+		beta[T - 1][i] *= C[0];
 	}
 	for (int t = T - 2; t >= 0; --t)
 	{
@@ -270,42 +208,12 @@ vector<vector<double>> HMM::backward(const vector<int> &o) const
 			{
 				beta[t][i] += beta[t + 1][j] * lambda.a[i][j] * lambda.b[j][o[t + 1]];
 			}
+			C[t + 1] += beta[t][i];
 		}
-	}
-
-	return beta;
-}
-
-vector<vector<double>> HMM::backward_scaled(const vector<int> &o) const
-{
-	const int M = lambda.b[0].size(), N = lambda.b.size(), T = o.size();
-	vector<vector<double>> beta(T, vector<double>(N, 0.0));
-
-	double C = 0.0;
-	for (int i = 0; i < N; ++i)
-	{
-		beta[T - 1][i] = 1;
-		C += beta[T - 1][i];
-	}
-	for (int i = 0; i < N; ++i)
-	{
-		beta[T - 1][i] /= C;
-	}
-
-	for (int t = T - 2; t >= 0; --t)
-	{
-		C = 0.0;
+		C[t + 1] = 1 / C[t + 1];
 		for (int i = 0; i < N; ++i)
 		{
-			for (int j = 0; j < N; ++j)
-			{
-				beta[t][i] += beta[t + 1][j] * lambda.a[i][j] * lambda.b[j][o[t + 1]];
-			}
-			C += beta[t][i];
-		}
-		for (int i = 0; i < N; ++i)
-		{
-			beta[t][i] /= C;
+			beta[t][i] *= C[t + 1];
 		}
 	}
 
