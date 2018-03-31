@@ -7,26 +7,9 @@
 
 using namespace std;
 
-MFC::MFC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel) : ICepstral(n_cepstra, q_gain, q_delta, q_accel),
-twiddle(setup_twiddle()), filter_bank(setup_filter_bank()), dct_matrix(setup_dct_matrix(n_cepstra))
+MFC::MFC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel) :
+	ICepstral(n_cepstra, q_gain, q_delta, q_accel), filter_bank(setup_filter_bank()), dct_matrix(setup_dct_matrix(n_cepstra))
 {
-}
-
-map<int, map<int, complex<double>>> MFC::setup_twiddle()
-{
-	map<int, map<int, complex<double>>> twiddle;
-
-	const complex<double> J(0, 1);
-	const double pi = 4.0 * atan(1.0);
-	for (int N = 2; N <= n_fft; N *= 2)
-	{
-		for (int k = 0; k <= N / 2 - 1; ++k)
-		{
-			twiddle[N][k] = exp(-2 * pi / N * k * J);
-		}
-	}
-
-	return twiddle;
 }
 
 vector<vector<double>> MFC::setup_filter_bank()
@@ -37,8 +20,7 @@ vector<vector<double>> MFC::setup_filter_bank()
 	vector<double> hz_filter_center(n_filters + 2, 0.0);
 	const function<double(double)> hertz2mel = [](double hz) { return 2595 * log10(1 + hz / 700); };
 	const function<double(double)> mel2hertz = [](double mel) { return 700 * (pow(10, mel / 2595) - 1); };
-	const double low_mel = hertz2mel(hz_low);
-	const double high_mel = hertz2mel(hz_high);
+	const double low_mel = hertz2mel(hz_low), high_mel = hertz2mel(hz_high);
 	for (int i = 0; i < n_filters + 2; ++i)
 	{
 		hz_filter_center[i] = mel2hertz(low_mel + (high_mel - low_mel) / (n_filters + 1.0) * i);
@@ -77,8 +59,7 @@ vector<vector<double>> MFC::setup_dct_matrix(int n_cepstra)
 {
 	vector<vector<double>> dct_matrix(n_cepstra + 1, vector<double>(n_filters, 0.0));
 
-	const double pi = 4.0 * atan(1.0);
-	const double c = sqrt(2.0 / n_filters);
+	const double pi = 4.0 * atan(1.0), c = sqrt(2.0 / n_filters);
 	for (int i = 0; i < n_cepstra + 1; ++i)
 	{
 		for (int j = 0; j < n_filters; ++j)
@@ -107,46 +88,59 @@ vector<double> MFC::power_spectrum(const vector<double> &frame) const
 	vector<double> P(n_fft_bins, 0.0);
 
 	vector<complex<double>> complex_frame(frame.begin(), frame.end());
-	complex_frame.resize(n_fft, complex<double>(0, 0));
-	const vector<complex<double>> transformed_frame = fft(complex_frame);
+	complex_frame.resize(n_fft, complex<double>());
+	fft(complex_frame);
 	for (int i = 0; i < n_fft_bins; ++i)
 	{
-		P[i] = pow(abs(transformed_frame[i]), 2);
+		P[i] = pow(abs(complex_frame[i]), 2);
 	}
 
 	return P;
 }
 
-vector<complex<double>> MFC::fft(const vector<complex<double>> &x) const
+void MFC::fft(vector<complex<double>> &x) const
 {
 	const int N = x.size();
-	if (N == 1)
+
+	// DFT
+	int n = N;
+	const double theta = 4.0 * atan(1.0) / N;
+	complex<double> phi(cos(theta), -sin(theta));
+	while (n > 1)
 	{
-		return x;
+		n >>= 1;
+		phi *= phi;
+
+		complex<double> R(1.0, 0.0);
+		for (int i = 0; i < n; ++i)
+		{
+			for (int j = i; j < N; j += n * 2)
+			{
+				const complex<double> t = x[j] - x[j + n];
+				x[j] += x[j + n];
+				x[j + n] = t * R;
+			}
+			R *= phi;
+		}
 	}
 
-	vector<complex<double>> X;
-
-	// compute N/2-point FFT
-	vector<complex<double>> xe(N / 2, 0.0), xo(N / 2, 0.0);
-	for (int i = 0; i < N / 2; ++i)
+	// decimation
+	const int m = log2(N);
+	for (int i = 0; i < N; ++i)
 	{
-		xe[i] = x[2 * i];
-		xo[i] = x[2 * i + 1];
-	}
-	const vector<complex<double>> Xe = fft(xe), Xo = fft(xo);
-	X.insert(X.end(), Xe.begin(), Xe.end());
-	X.insert(X.end(), Xo.begin(), Xo.end());
+		// reverse bits
+		int j = i;
+		j = ((j & 0xaaaaaaaa) >> 1) | ((j & 0x55555555) << 1);
+		j = ((j & 0xcccccccc) >> 2) | ((j & 0x33333333) << 2);
+		j = ((j & 0xf0f0f0f0) >> 4) | ((j & 0x0f0f0f0f) << 4);
+		j = ((j & 0xff00ff00) >> 8) | ((j & 0x00ff00ff) << 8);
+		j = ((j >> 16) | (j << 16)) >> (32 - m);
 
-	// butterfly computations
-	for (int i = 0; i <= N / 2 - 1; ++i)
-	{
-		const complex<double> t = X[i], tw = twiddle.at(N).at(i);
-		X[i] = t + tw * X[i + N / 2];
-		X[i + N / 2] = t - tw * X[i + N / 2];
+		if (j > i)
+		{
+			swap(x[i], x[j]);
+		}
 	}
-
-	return X;
 }
 
 vector<double> MFC::lmfb(const vector<double> &P) const
