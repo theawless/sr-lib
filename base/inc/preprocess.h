@@ -14,10 +14,12 @@ public:
 private:
 	static constexpr double normalisation_value = 5000.0;
 	static constexpr double pre_emphasis_factor = 0.95;
+	static constexpr int x_bg_window = 800;
+	static constexpr int x_trim_window = 80;
 
-	const int x_frames;
-	const int x_overlap;
 	const std::vector<double> hamming_coefficients;
+	const int x_frame;
+	const int x_overlap;
 
 	/// Setup hamming coefficients.
 	static std::vector<double> setup_hamming_coefficients(int x_frame);
@@ -28,12 +30,13 @@ private:
 	/// Normalise the signal.
 	void normalise(std::vector<double> &samples) const;
 
+	/// Trim the signal.
 	std::vector<double> Preprocessor::trim(const std::vector<double> &samples) const;
 
 	/// Premphasize - boost the higher frequencies.
 	void pre_emphasize(std::vector<double> &samples) const;
 
-	/// Divides the segments into frames.
+	/// Divide the segments into frames.
 	std::vector<std::vector<double>> framing(const std::vector<double> &samples) const;
 
 	/// Apply hamming window.

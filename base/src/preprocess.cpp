@@ -7,7 +7,8 @@
 
 using namespace std;
 
-Preprocessor::Preprocessor(int x_frame, int x_overlap) : x_frames(x_frame), x_overlap(x_overlap), hamming_coefficients(setup_hamming_coefficients(x_frames))
+Preprocessor::Preprocessor(int x_frame, int x_overlap) :
+	x_frame(x_frame), x_overlap(x_overlap), hamming_coefficients(setup_hamming_coefficients(x_frame))
 {
 }
 
@@ -66,22 +67,21 @@ vector<double> Preprocessor::trim(const vector<double> &samples) const
 {
 	vector<double> trimmed_samples;
 
-	const int bg_window = 800, window = 80;
-	const vector<double> bg(samples.begin(), samples.begin() + bg_window);
+	const vector<double> bg(samples.begin(), samples.begin() + x_bg_window);
 	const double mean_bg = accumulate(bg.begin(), bg.end(), 0.0) / samples.size();
-	const double sd_bg = sqrt(accumulate(bg.begin(), bg.end(), 0.0, [mean_bg](double a, double b) { return a + pow(b - mean_bg, 2); }) / bg_window);
+	const double sd_bg = sqrt(accumulate(bg.begin(), bg.end(), 0.0, [mean_bg](double a, double b) { return a + pow(b - mean_bg, 2); }) / x_bg_window);
 
-	for (int i = 0; i <= samples.size() - window; i += window)
+	for (int i = 0; i <= (int)samples.size() - x_trim_window; i += x_trim_window)
 	{
 		int voiced = 0;
-		for (int j = 0; j < window; ++j)
+		for (int j = 0; j < x_trim_window; ++j)
 		{
 			double distance = abs(samples[i + j] - mean_bg) / sd_bg;
 			voiced += distance > 3.0 ? 1 : -1;
 		}
 		if (voiced > 0)
 		{
-			trimmed_samples.insert(trimmed_samples.end(), samples.begin() + i, samples.begin() + i + window);
+			trimmed_samples.insert(trimmed_samples.end(), samples.begin() + i, samples.begin() + i + x_trim_window);
 		}
 	}
 
@@ -100,11 +100,9 @@ vector<vector<double>> Preprocessor::framing(const vector<double> &samples) cons
 {
 	vector<vector<double>> frames;
 
-	for (int i = 0; i <= samples.size() - x_frames; i += x_overlap)
+	for (int i = 0; i <= (int)samples.size() - x_frame; i += x_overlap)
 	{
-		const vector<double>::const_iterator left = samples.begin() + i;
-		const vector<double>::const_iterator right = left + x_frames;
-		vector<double> frame(left, right);
+		vector<double> frame(samples.begin() + i, samples.begin() + i + x_frame);
 		hamming_window(frame);
 		frames.push_back(frame);
 	}
@@ -114,7 +112,7 @@ vector<vector<double>> Preprocessor::framing(const vector<double> &samples) cons
 
 void Preprocessor::hamming_window(vector<double> &frame) const
 {
-	for (int i = 0; i < x_frames; ++i)
+	for (int i = 0; i < x_frame; ++i)
 	{
 		frame[i] *= hamming_coefficients[i];
 	}
