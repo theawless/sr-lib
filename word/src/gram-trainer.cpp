@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <functional>
 #include <future>
+#include <thread>
+#include <utility>
 
 #include "logger.h"
 #include "utils.h"

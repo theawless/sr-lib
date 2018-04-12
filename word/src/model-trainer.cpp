@@ -1,6 +1,8 @@
 #include "model-trainer.h"
 
 #include <future>
+#include <thread>
+#include <utility>
 
 #include "hmm.h"
 #include "logger.h"

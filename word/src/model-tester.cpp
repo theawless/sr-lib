@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <future>
+#include <thread>
 
 #include "hmm.h"
 #include "logger.h"

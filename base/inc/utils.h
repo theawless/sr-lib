@@ -53,7 +53,7 @@ namespace Utils
 	{
 		if (vec.empty())
 		{
-			return string();
+			return std::string();
 		}
 
 		std::stringstream stream;
@@ -89,7 +89,7 @@ namespace Utils
 	{
 		if (mat.empty())
 		{
-			return string();
+			return std::string();
 		}
 
 		std::stringstream stream;

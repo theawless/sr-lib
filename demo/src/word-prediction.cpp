@@ -1,6 +1,6 @@
 #include <memory>
 #include <string>
-#include <tuple>
+#include <utility>
 #include <vector>
 
 #include "config.h"
@@ -10,7 +10,6 @@
 #include "utils.h"
 
 using namespace std;
-
 
 static vector<string> get_words(const vector<vector<string>> &sentences)
 {
