@@ -3,7 +3,7 @@
 #include <utility>
 #include <vector>
 
-#include "features.h"
+#include "feature.h"
 
 class KMeans
 {

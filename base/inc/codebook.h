@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "features.h"
+#include "feature.h"
 
 struct Codebook
 {

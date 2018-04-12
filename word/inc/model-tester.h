@@ -7,7 +7,7 @@
 
 #include "codebook.h"
 #include "config.h"
-#include "features.h"
+#include "feature.h"
 #include "model.h"
 #include "preprocess.h"
 #include "threads.h"

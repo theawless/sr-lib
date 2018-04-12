@@ -4,7 +4,7 @@
 #include <map>
 #include <vector>
 
-#include "features.h"
+#include "feature.h"
 
 /// Thanks to https://github.com/dspavankumar/compute-mfcc
 class MFC : public ICepstral
