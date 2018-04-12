@@ -31,7 +31,7 @@ private:
 	void normalise(std::vector<double> &samples) const;
 
 	/// Trim the signal.
-	std::vector<double> Preprocessor::trim(const std::vector<double> &samples) const;
+	std::vector<double> trim(const std::vector<double> &samples) const;
 
 	/// Premphasize - boost the higher frequencies.
 	void pre_emphasize(std::vector<double> &samples) const;
