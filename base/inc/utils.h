@@ -108,7 +108,7 @@ namespace Utils
 	template <typename T>
 	inline T get_item_from_file(const std::string &filename)
 	{
-		std::ifstream stream(filename);
+		std::ifstream stream(filename, std::ios::binary);
 
 		return get_item_from_stream<T>(stream);
 	}
@@ -117,7 +117,7 @@ namespace Utils
 	template <typename T>
 	inline void set_item_to_file(const T &item, const std::string &filename)
 	{
-		std::ofstream stream(filename);
+		std::ofstream stream(filename, std::ios::binary);
 
 		stream << get_string_from_item<T>(item);
 	}
@@ -126,7 +126,7 @@ namespace Utils
 	template <typename T>
 	inline std::vector<T> get_vector_from_file(const std::string &filename, char delim = '\n')
 	{
-		std::ifstream stream(filename);
+		std::ifstream stream(filename, std::ios::binary);
 
 		return get_vector_from_stream<T>(stream, delim);
 	}
@@ -135,7 +135,7 @@ namespace Utils
 	template <typename T>
 	inline void set_vector_to_file(const std::vector<T> &vec, const std::string &filename, char delim = '\n')
 	{
-		std::ofstream stream(filename);
+		std::ofstream stream(filename, std::ios::binary);
 
 		stream << get_string_from_vector<T>(vec, delim);
 	}
@@ -144,7 +144,7 @@ namespace Utils
 	template <typename T>
 	inline std::vector<std::vector<T>> get_matrix_from_file(const std::string &filename, char delim_token = ',', char delim_line = '\n')
 	{
-		std::ifstream stream(filename);
+		std::ifstream stream(filename, std::ios::binary);
 
 		return get_matrix_from_stream<T>(stream, delim_token, delim_line);
 	}
@@ -153,7 +153,7 @@ namespace Utils
 	template <typename T>
 	inline void set_matrix_to_file(const std::vector<std::vector<T>> &mat, const std::string &filename, char delim_token = ',', char delim_line = '\n')
 	{
-		std::ofstream stream(filename);
+		std::ofstream stream(filename, std::ios::binary);
 
 		stream << get_string_from_matrix(mat, delim_token, delim_line);
 	}

@@ -92,27 +92,29 @@ bool Model::empty() const
 
 istream &operator>>(istream &input, Model &model)
 {
-	char c;
+	string line;
 	stringstream stream;
 
-	input.get(); input.get(); input.get();
-	while (input.get(c) && c != 'a')
-	{
-		stream << c;
-	}
+	// pi
+	std::getline(input, line);
+	std::getline(input, line);
+	stream << line;
 	model.pi = Utils::get_vector_from_stream<double>(stream);
 
-	input.get(); stream.str(string()); stream.clear();
-	while (input.get(c) && c != 'b')
+	// a
+	std::getline(input, line);
+	stream = std::stringstream();
+	while (std::getline(input, line) && line != "b")
 	{
-		stream << c;
+		stream << line << '\n';
 	}
 	model.a = Utils::get_matrix_from_stream<double>(stream);
 
-	input.get(); stream.str(string()); stream.clear();
-	while (input.get(c))
+	// b
+	stream = std::stringstream();
+	while (std::getline(input, line))
 	{
-		stream << c;
+		stream << line << '\n';
 	}
 	model.b = Utils::get_matrix_from_stream<double>(stream);
 
