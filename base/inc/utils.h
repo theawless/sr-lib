@@ -25,7 +25,8 @@ namespace Utils
 	{
 		std::stringstream stream;
 		// maximise precision
-		stream.precision(std::numeric_limits<double>::max_digits10); stream.setf(std::ios::scientific);
+		stream.precision(std::numeric_limits<double>::max_digits10);
+		stream.setf(std::ios::scientific);
 		stream << item;
 
 		return stream.str();

@@ -112,10 +112,14 @@ ModelTester::ModelTester(unique_ptr<ThreadPool> thread_pool, Preprocessor prepro
 vector<int> ModelTester::get_observations(const string &filename) const
 {
 	vector<int> observations;
-	const string obs_filename = filename + observations_ext;
-	Logger::log("Getting", obs_filename);
+	Logger::log("Getting observations");
 
 	const vector<Feature> features = get_features(filename);
+	if (features.empty())
+	{
+		return observations;
+	}
+
 	observations = codebook.observations(features);
 
 	return observations;
@@ -124,12 +128,16 @@ vector<int> ModelTester::get_observations(const string &filename) const
 vector<Feature> ModelTester::get_features(const string &filename) const
 {
 	vector<Feature> features;
-	const string features_filename = filename + features_ext;
-	Logger::log("Getting", features_filename);
+	Logger::log("Getting features");
 
 	const string wav_filename = filename + wav_ext;
 	const Wav wav_file(wav_filename);
 	const vector<double> samples = wav_file.samples<double>();
+	if (samples.empty())
+	{
+		return features;
+	}
+
 	const vector<vector<double>> frames = preprocessor.process(samples);
 	features = cepstral->features(frames);
 

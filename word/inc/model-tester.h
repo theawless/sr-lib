@@ -54,8 +54,6 @@ public:
 
 private:
 	static constexpr char *wav_ext = ".wav";
-	static constexpr char *observations_ext = ".observations";
-	static constexpr char *features_ext = ".features";
 
 	const std::unique_ptr<ThreadPool> thread_pool;
 	const Preprocessor preprocessor;

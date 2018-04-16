@@ -1,4 +1,3 @@
-#include <fstream>
 #include <memory>
 #include <numeric>
 #include <string>
@@ -34,17 +33,14 @@ int main()
 		for (int j = 0; ; ++j)
 		{
 			const string test_filename = test_folder + words[i] + '_' + to_string(j);
-			const string test_wav_filename = test_filename + ".wav";
-			if (!ifstream(test_wav_filename).good())
+			const pair<bool, vector<double>> scores = model_tester->test(test_filename);
+			if (!scores.first)
 			{
 				break;
 			}
 
-			const pair<bool, vector<double>> scores = model_tester->test(test_filename);
 			const int word_index = max_element(scores.second.begin(), scores.second.end()) - scores.second.begin();
-
-			n_utterances[i]++;
-			if (!scores.first || scores.second[word_index] == 0.0)
+			if (scores.second[word_index] == 0.0)
 			{
 				n_errs[i]++;
 			}
@@ -52,6 +48,7 @@ int main()
 			{
 				n_hits[i]++;
 			}
+			n_utterances[i]++;
 		}
 	}
 
