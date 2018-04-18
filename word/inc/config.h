@@ -8,6 +8,25 @@
 
 #include "utils.h"
 
+/// Config keys
+/// n_thread     (int):     number of threads used for parallel execution
+/// x_frame      (int):     number of samples in a frame
+/// x_overlap    (int):     number of samples to be overlapped while framing
+/// cepstra      (string):  "mfc" or "lpc" variants of feature generation
+/// n_cepstra    (int):     number of features
+/// n_predict    (int):     P of autocorrelation, only for lpc
+/// q_gain       (bool):    whether gain term should be added to features
+/// q_delta      (bool):    whether delta terms should be added to features
+/// q_accel      (bool):    whether accel terms should be added to features
+/// x_codebook   (int):     size of codebook
+/// n_state      (int):     number of states in HMM
+/// n_bakis      (int):     connentedness of initial bakis model for HMM
+/// n_retrain    (int):     number of times each model should be trained
+/// n_gram       (int):     number of previous words to be considered for prediction
+/// q_dfa        (bool):    command based word prediction or probability based
+/// gram_weight  (double):  linear weight for the final scoring with recognition result
+/// cutoff_score (double):  cutoff for final score
+
 struct Config
 {
 protected:
