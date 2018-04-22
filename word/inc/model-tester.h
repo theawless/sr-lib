@@ -25,8 +25,8 @@ public:
 		std::unique_ptr<ModelTester> build() const;
 
 	private:
-		static constexpr char *codebook_ext = "sr-lib.codebook";
-		static constexpr char *model_ext = ".model";
+		static constexpr char const *codebook_ext = "sr-lib.codebook";
+		static constexpr char const *model_ext = ".model";
 
 		const std::string folder;
 		const int n_thread;
@@ -54,7 +54,7 @@ public:
 	std::pair<bool, std::vector<double>> test(const std::string &filename) const;
 
 private:
-	static constexpr char *wav_ext = ".wav";
+	static constexpr char const *wav_ext = ".wav";
 
 	const std::unique_ptr<ThreadPool> thread_pool;
 	const Preprocessor preprocessor;

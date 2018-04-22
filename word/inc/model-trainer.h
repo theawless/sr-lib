@@ -49,12 +49,12 @@ public:
 	void train() const;
 
 private:
-	static constexpr char *wav_ext = ".wav";
-	static constexpr char *features_ext = ".features";
-	static constexpr char *universe_ext = "sr-lib.universe";
-	static constexpr char *codebook_ext = "sr-lib.codebook";
-	static constexpr char *observations_ext = ".observations";
-	static constexpr char *model_ext = ".model";
+	static constexpr char const *wav_ext = ".wav";
+	static constexpr char const *features_ext = ".features";
+	static constexpr char const *universe_ext = "sr-lib.universe";
+	static constexpr char const *codebook_ext = "sr-lib.codebook";
+	static constexpr char const *observations_ext = ".observations";
+	static constexpr char const *model_ext = ".model";
 
 	const std::string folder;
 	const std::vector<std::string> words;

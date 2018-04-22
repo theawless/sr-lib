@@ -21,7 +21,7 @@ public:
 		std::unique_ptr<GramTester> build() const;
 
 	private:
-		static constexpr char *gram_ext = ".gram";
+		static constexpr char const *gram_ext = ".gram";
 
 		const std::string folder;
 		const int n_gram;

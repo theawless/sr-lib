@@ -35,7 +35,7 @@ public:
 	void train() const;
 
 private:
-	static constexpr char *gram_ext = ".gram";
+	static constexpr char const *gram_ext = ".gram";
 
 	const std::string folder;
 	const std::vector<std::vector<std::string>> sentences;
