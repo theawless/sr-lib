@@ -5,13 +5,13 @@
 #include <utility>
 #include <vector>
 
-/// Thanks to https://stackoverflow.com/questions/27375089/what-is-the-easiest-way-to-print-a-variadic-parameter-pack-using-stdostream
 namespace Logger
 {
 	/// Print the args in the given stream.
 	template <typename Arg, typename... Args>
-	static inline void unpack(std::ostream& out, Arg&& arg, Args&&... args)
+	static inline void print(std::ostream& out, Arg&& arg, Args&&... args)
 	{
+		// https://stackoverflow.com/questions/27375089/what-is-the-easiest-way-to-print-a-variadic-parameter-pack-using-stdostream
 		out << std::forward<Arg>(arg);
 		using expander = int[];
 		(void)expander
@@ -25,7 +25,7 @@ namespace Logger
 	inline void info(Args... args)
 	{
 		std::stringstream stream;
-		unpack(stream, args...);
+		print(stream, args...);
 
 		std::cout << stream.str() + '\n';
 		std::cout.flush();
@@ -37,7 +37,7 @@ namespace Logger
 	{
 #if DEBUG
 		std::stringstream stream;
-		unpack(stream, args...);
+		print(stream, args...);
 
 		std::clog << stream.str() + '\n';
 		std::clog.flush();
