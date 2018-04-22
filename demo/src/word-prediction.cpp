@@ -1,3 +1,4 @@
+#include <chrono>
 #include <memory>
 #include <string>
 #include <utility>
@@ -39,10 +40,15 @@ int main()
 	const vector<vector<string>> sentences = Utils::get_matrix_from_file<string>(sentences_filename, ' ');
 
 	Logger::info("Training...");
+	chrono::steady_clock::time_point start = chrono::steady_clock::now();
 	const string train_folder = folder + "train/";
 	const unique_ptr<GramTrainer> gram_trainer = GramTrainer::Builder(train_folder, sentences, config).build();
 	const unique_ptr<GramTester> gram_tester = GramTester::Builder(train_folder, config).build();
+	chrono::steady_clock::time_point end = chrono::steady_clock::now();
+	chrono::seconds time = chrono::duration_cast<chrono::seconds>(end - start);
+	Logger::info("Time taken:", time.count());
 
+	Logger::info("Testing...");
 	const vector<string> words = get_words(sentences);
 	string word;
 	vector<string> context;

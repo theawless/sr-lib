@@ -1,3 +1,4 @@
+#include <chrono>
 #include <memory>
 #include <numeric>
 #include <string>
@@ -22,10 +23,16 @@ int main()
 	const vector<string> words = Utils::get_vector_from_file<string>(words_filename);
 
 	Logger::info("Training...");
+	chrono::steady_clock::time_point start = chrono::steady_clock::now();
 	const string train_folder = folder + "train/";
 	const unique_ptr<ModelTrainer> model_trainer = ModelTrainer::Builder(train_folder, words, config).build();
 	const unique_ptr<ModelTester> model_tester = ModelTester::Builder(train_folder, config).build();
+	chrono::steady_clock::time_point end = chrono::steady_clock::now();
+	chrono::seconds time = chrono::duration_cast<chrono::seconds>(end - start);
+	Logger::info("Time taken:", time.count(), "seconds");
 
+	Logger::info("Testing...");
+	start = chrono::steady_clock::now();
 	const string test_folder = folder + "test/";
 	vector<int> n_utterances(words.size(), 0), n_hits(words.size(), 0), n_errs(words.size(), 0);
 	for (int i = 0; i < words.size(); ++i)
@@ -51,6 +58,9 @@ int main()
 			n_utterances[i]++;
 		}
 	}
+	end = chrono::steady_clock::now();
+	time = chrono::duration_cast<chrono::seconds>(end - start);
+	Logger::info("Time taken:", time.count(), "seconds");
 
 	const int total_utterances = accumulate(n_utterances.begin(), n_utterances.end(), 0);
 	const int total_hits = accumulate(n_hits.begin(), n_hits.end(), 0);
