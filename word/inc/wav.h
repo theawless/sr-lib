@@ -10,7 +10,6 @@
 struct Wav
 {
 public:
-
 	/// Get the samples.
 	template <typename T>
 	inline std::vector<T> samples() const
@@ -29,6 +28,11 @@ public:
 	/// Operator for loading.
 	friend std::istream &operator>>(std::istream &input, Wav &wav)
 	{
+		if (!input.good())
+		{
+			return input;
+		}
+
 		input.read(reinterpret_cast<char *>(&wav.chunk_id[0]), wav.chunk_id.size() * sizeof(wav.chunk_id[0]));
 		input.read(reinterpret_cast<char *>(&wav.chunk_size), sizeof(wav.chunk_size));
 		input.read(reinterpret_cast<char *>(&wav.format[0]), wav.format.size() * sizeof(wav.format[0]));
@@ -70,5 +74,5 @@ private:
 	// data
 	std::array<char, 4> subchunk2_id;
 	uint32_t subchunk2_size;
-	std::vector<uint16_t> data = std::vector<uint16_t>();
+	std::vector<uint16_t> data;
 };
