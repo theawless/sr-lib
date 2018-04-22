@@ -15,7 +15,7 @@ using namespace std;
 
 ModelTrainer::Builder::Builder(const string &folder, const vector<string> &words, const Config &config) :
 	folder(folder), words(words), n_thread(config.get_val<int>("n_thread", 4 * thread::hardware_concurrency())),
-	x_frame(config.get_val<int>("x_frame", 300)), x_overlap(config.get_val<int>("x_overlap", 80)),
+	q_trim(config.get_val<bool>("q_trim", true)), x_frame(config.get_val<int>("x_frame", 300)), x_overlap(config.get_val<int>("x_overlap", 80)),
 	cepstral(config.get_val<string>("cepstral", "mfc")), n_cepstra(config.get_val<int>("n_cepstra", 12)), n_predict(config.get_val<int>("n_predict", 12)),
 	q_gain(config.get_val<bool>("q_gain", false)), q_delta(config.get_val<bool>("q_delta", false)), q_accel(config.get_val<bool>("q_accel", false)),
 	x_codebook(config.get_val<int>("x_codebook", 16)),
@@ -25,7 +25,7 @@ ModelTrainer::Builder::Builder(const string &folder, const vector<string> &words
 
 unique_ptr<ModelTrainer> ModelTrainer::Builder::build() const
 {
-	return unique_ptr<ModelTrainer>(new ModelTrainer(folder, words, unique_ptr<ThreadPool>(new ThreadPool(n_thread)), Preprocessor(x_frame, x_overlap), get_cepstral(), LBG(x_codebook), Model::Builder(n_state, x_codebook, n_bakis), n_retrain));
+	return unique_ptr<ModelTrainer>(new ModelTrainer(folder, words, unique_ptr<ThreadPool>(new ThreadPool(n_thread)), Preprocessor(q_trim, x_frame, x_overlap), get_cepstral(), LBG(x_codebook), Model::Builder(n_state, x_codebook, n_bakis), n_retrain));
 }
 
 unique_ptr<ICepstral> ModelTrainer::Builder::get_cepstral() const

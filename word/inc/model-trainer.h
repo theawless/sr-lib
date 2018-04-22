@@ -27,6 +27,7 @@ public:
 		const std::string folder;
 		const std::vector<std::string> words;
 		const int n_thread;
+		const bool q_trim;
 		const int x_frame;
 		const int x_overlap;
 		const std::string cepstral;

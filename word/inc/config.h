@@ -10,6 +10,7 @@
 
 /// Config keys
 /// n_thread     (int):     number of threads used for parallel execution
+/// q_trim       (bool):    whether the samples should be trimmed for background noise
 /// x_frame      (int):     number of samples in a frame
 /// x_overlap    (int):     number of samples to be overlapped while framing
 /// cepstra      (string):  "mfc" or "lpc" variants of feature generation

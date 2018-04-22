@@ -6,7 +6,7 @@ class Preprocessor
 {
 public:
 	/// Constructor.
-	Preprocessor(int x_frame, int x_overlap);
+	Preprocessor(bool q_trim, int x_frame, int x_overlap);
 
 	/// Process the samples and return frames.
 	std::vector<std::vector<double>> process(const std::vector<double> &samples) const;
@@ -18,6 +18,7 @@ private:
 	static constexpr int x_trim_window = 80;
 
 	const std::vector<double> hamming_coefficients;
+	const bool q_trim;
 	const int x_frame;
 	const int x_overlap;
 

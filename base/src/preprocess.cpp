@@ -7,8 +7,8 @@
 
 using namespace std;
 
-Preprocessor::Preprocessor(int x_frame, int x_overlap) :
-	x_frame(x_frame), x_overlap(x_overlap), hamming_coefficients(setup_hamming_coefficients(x_frame))
+Preprocessor::Preprocessor(bool q_trim, int x_frame, int x_overlap) :
+	q_trim(q_trim), x_frame(x_frame), x_overlap(x_overlap), hamming_coefficients(setup_hamming_coefficients(x_frame))
 {
 }
 
@@ -19,7 +19,10 @@ vector<vector<double>> Preprocessor::process(const vector<double> &unprocessed_s
 	vector<double> samples = unprocessed_samples;
 	dc_offset(samples);
 	normalise(samples);
-	samples = trim(samples);
+	if (q_trim)
+	{
+		samples = trim(samples);
+	}
 	pre_emphasize(samples);
 	frames = framing(samples);
 

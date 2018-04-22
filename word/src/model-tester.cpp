@@ -16,7 +16,7 @@ using namespace std;
 
 ModelTester::Builder::Builder(const string &folder, const Config &config) :
 	folder(folder), n_thread(config.get_val<int>("n_thread", 4 * thread::hardware_concurrency())),
-	x_frame(config.get_val<int>("x_frame", 300)), x_overlap(config.get_val<int>("x_overlap", 80)),
+	q_trim(config.get_val<bool>("q_trim", true)), x_frame(config.get_val<int>("x_frame", 300)), x_overlap(config.get_val<int>("x_overlap", 80)),
 	cepstral(config.get_val<string>("cepstral", "mfc")), n_cepstra(config.get_val<int>("n_cepstra", 12)), n_predict(config.get_val<int>("n_predict", 12)),
 	q_gain(config.get_val<bool>("q_gain", false)), q_delta(config.get_val<bool>("q_delta", false)), q_accel(config.get_val<bool>("q_accel", false))
 {
@@ -24,7 +24,7 @@ ModelTester::Builder::Builder(const string &folder, const Config &config) :
 
 unique_ptr<ModelTester> ModelTester::Builder::build() const
 {
-	return unique_ptr<ModelTester>(new ModelTester(unique_ptr<ThreadPool>(new ThreadPool(n_thread)), Preprocessor(x_frame, x_overlap), get_cepstral(), get_codebook(), get_models()));
+	return unique_ptr<ModelTester>(new ModelTester(unique_ptr<ThreadPool>(new ThreadPool(n_thread)), Preprocessor(q_trim, x_frame, x_overlap), get_cepstral(), get_codebook(), get_models()));
 }
 
 unique_ptr<ICepstral> ModelTester::Builder::get_cepstral() const
