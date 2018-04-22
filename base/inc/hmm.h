@@ -5,6 +5,8 @@
 
 #include "model.h"
 
+/// http://www.ece.ucsb.edu/Faculty/Rabiner/ece259/Reprints/tutorial%20on%20hmm%20and%20applications.pdf
+/// Fundamentals of Speech Recognition - Lawrence Rabiner, Biing-Hwang Juang.
 class HMM
 {
 public:
@@ -14,7 +16,7 @@ public:
 	/// Optimise the given model with given observation sequence.
 	Model optimise(const std::vector<int> &o);
 
-	/// Calculate alpha values and P(O|lambda).
+	/// Calculate how well the observations fit with scaling.
 	std::pair<double, std::vector<std::vector<double>>> forward(const std::vector<int> &o) const;
 
 private:
@@ -27,10 +29,10 @@ private:
 	/// Tweak values of lambda.
 	void tweak();
 
-	/// Calculate P* and optimal states.
+	/// Calculate the best possible path with scaling.
 	std::pair<double, std::vector<int>> viterbi(const std::vector<int> &o) const;
 
-	/// Calculate beta values.
+	/// Calculate beta values with scaling.
 	std::vector<std::vector<double>> backward(const std::vector<int> &o) const;
 
 	/// Improve Model by using Baum Whelch algorithm.

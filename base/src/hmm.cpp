@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <cmath>
 
-#include "logger.h"
-
 using namespace std;
 
 HMM::HMM(const Model &lambda) :
@@ -23,7 +21,6 @@ Model HMM::optimise(const vector<int> &o)
 	{
 		iteration += 1;
 		old_P_star = P_star;
-		Logger::log("Restimate lambda: iteration:", iteration, "P* is:", P_star);
 
 		restimate(o);
 		tweak();
@@ -75,6 +72,7 @@ pair<double, vector<vector<double>>> HMM::forward(const vector<int> &o) const
 	return alpha;
 }
 
+/// Forcibly set all zeroes in the model to minimum probability.
 void HMM::tweak()
 {
 	const int M = lambda.b[0].size(), N = lambda.b.size();

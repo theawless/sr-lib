@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "utils.h"
+#include "io.h"
 
 using namespace std;
 
@@ -13,12 +13,12 @@ bool Gram::empty() const
 
 istream &operator>>(istream &input, Gram &gram)
 {
-	vector<vector<string>> mat = Utils::get_matrix_from_stream<string>(input, '=');
+	vector<vector<string>> mat = IO::get_matrix_from_stream<string>(input, '=');
 
 	for (int i = 0; i < mat.size(); ++i)
 	{
 		stringstream stream(mat[i][0]);
-		gram.counts[Utils::get_vector_from_stream<string>(stream, '|')] = stoi(mat[i][1]);
+		gram.counts[IO::get_vector_from_stream<string>(stream, '|')] = stoi(mat[i][1]);
 	}
 
 	return input;
@@ -30,10 +30,10 @@ ostream &operator<<(ostream &output, const Gram &gram)
 
 	for (map<vector<string>, int>::const_iterator it = gram.counts.begin(); it != gram.counts.end(); ++it)
 	{
-		vector<string> vec{ Utils::get_string_from_vector<string>(it->first, '|'), to_string(it->second) };
+		vector<string> vec{ IO::get_string_from_vector<string>(it->first, '|'), to_string(it->second) };
 		mat.push_back(vec);
 	}
-	output << Utils::get_string_from_matrix<string>(mat, '=');
+	output << IO::get_string_from_matrix<string>(mat, '=');
 
 	return output;
 }

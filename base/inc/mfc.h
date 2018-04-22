@@ -6,7 +6,7 @@
 
 #include "feature.h"
 
-/// Thanks to https://github.com/dspavankumar/compute-mfcc
+/// https://github.com/dspavankumar/compute-mfcc
 class MFC : public ICepstral
 {
 public:
@@ -36,8 +36,7 @@ private:
 	/// Find power spectrum.
 	std::vector<double> power_spectrum(const std::vector<double> &frame) const;
 
-	/// Cooley-Tukey FFT (in-place, breadth-first, decimation-in-frequency).
-	/// Thanks to https://rosettacode.org/wiki/Fast_Fourier_transform
+	/// Cooley-Tukey, in-place, breadth-first, decimation-in-frequency.
 	void fft(std::vector<std::complex<double>> &x) const;
 
 	/// Apply log Mel filterbank.

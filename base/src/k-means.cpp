@@ -2,8 +2,6 @@
 
 #include <limits>
 
-#include "logger.h"
-
 using namespace std;
 
 KMeans::KMeans(const vector<Feature> &universe) :
@@ -21,7 +19,6 @@ vector<Feature> KMeans::optimise(const vector<Feature> &old_centroids) const
 	{
 		buckets = new_buckets;
 		iteration += 1;
-		Logger::log("Kmeans: iteration:", iteration, "distortion is:", buckets.first);
 
 		relocate(buckets.second, centroids);
 		new_buckets = classify(centroids);

@@ -4,11 +4,11 @@
 #include <thread>
 #include <utility>
 
+#include "file-io.h"
 #include "hmm.h"
 #include "logger.h"
 #include "lpc.h"
 #include "mfc.h"
-#include "utils.h"
 #include "wav.h"
 
 using namespace std;
@@ -72,7 +72,7 @@ Codebook ModelTrainer::get_codebook() const
 	const string codebook_filename = folder + codebook_ext;
 	Logger::log("Getting", codebook_filename);
 
-	codebook = Utils::get_item_from_file<Codebook>(codebook_filename);
+	codebook = FileIO::get_item_from_file<Codebook>(codebook_filename);
 	if (!codebook.empty())
 	{
 		return codebook;
@@ -80,7 +80,7 @@ Codebook ModelTrainer::get_codebook() const
 
 	const vector<Feature> universe = get_universe();
 	codebook = lbg.generate(universe);
-	Utils::set_item_to_file<Codebook>(codebook, codebook_filename);
+	FileIO::set_item_to_file<Codebook>(codebook, codebook_filename);
 
 	return codebook;
 }
@@ -91,7 +91,7 @@ vector<Feature> ModelTrainer::get_universe() const
 	const string universe_filename = folder + universe_ext;
 	Logger::log("Getting", universe_filename);
 
-	universe = Utils::get_vector_from_file<Feature>(universe_filename, '\n');
+	universe = FileIO::get_vector_from_file<Feature>(universe_filename, '\n');
 	if (!universe.empty())
 	{
 		return universe;
@@ -109,7 +109,7 @@ vector<Feature> ModelTrainer::get_universe() const
 		universe.insert(universe.end(), word_universe.begin(), word_universe.end());
 	}
 
-	Utils::set_vector_to_file<Feature>(universe, universe_filename, '\n');
+	FileIO::set_vector_to_file<Feature>(universe, universe_filename, '\n');
 
 	return universe;
 }
@@ -139,23 +139,24 @@ vector<Feature> ModelTrainer::get_features(const string &filename) const
 	const string features_filename = filename + features_ext;
 	Logger::log("Getting", features_filename);
 
-	features = Utils::get_vector_from_file<Feature>(features_filename);
+	features = FileIO::get_vector_from_file<Feature>(features_filename);
 	if (!features.empty())
 	{
 		return features;
 	}
 
 	const string wav_filename = filename + wav_ext;
-	const Wav wav_file(wav_filename);
+	const Wav wav_file = FileIO::get_item_from_file<Wav>(wav_filename);
 	const vector<double> samples = wav_file.samples<double>();
 	if (samples.empty())
 	{
+		// file not found
 		return features;
 	}
 
 	const vector<vector<double>> frames = preprocessor.process(samples);
 	features = cepstral->features(frames);
-	Utils::set_vector_to_file<Feature>(features, features_filename);
+	FileIO::set_vector_to_file<Feature>(features, features_filename);
 
 	return features;
 }
@@ -166,7 +167,7 @@ Model ModelTrainer::get_word_model(int word_index, const Codebook &codebook) con
 	const string model_filename = folder + to_string(word_index) + model_ext;
 	Logger::log("Getting", model_filename);
 
-	model = Utils::get_item_from_file<Model>(model_filename);
+	model = FileIO::get_item_from_file<Model>(model_filename);
 	if (!model.empty())
 	{
 		return model;
@@ -180,7 +181,7 @@ Model ModelTrainer::get_word_model(int word_index, const Codebook &codebook) con
 		const string train_model_filename = filename + model_ext + "_" + to_string(j);
 		Logger::log("Getting", train_model_filename);
 
-		train_model = Utils::get_item_from_file<Model>(train_model_filename);
+		train_model = FileIO::get_item_from_file<Model>(train_model_filename);
 		if (!train_model.empty())
 		{
 			model = train_model;
@@ -188,10 +189,10 @@ Model ModelTrainer::get_word_model(int word_index, const Codebook &codebook) con
 		}
 
 		train_model = get_utterance_model(filename, codebook, model);
-		Utils::set_item_to_file<Model>(train_model, train_model_filename);
+		FileIO::set_item_to_file<Model>(train_model, train_model_filename);
 		model = train_model;
 	}
-	Utils::set_item_to_file<Model>(model, model_filename);
+	FileIO::set_item_to_file<Model>(model, model_filename);
 
 	return model;
 }
@@ -206,6 +207,7 @@ Model ModelTrainer::get_utterance_model(const string &filename, const Codebook &
 		const vector<int> observations = get_observations(utterance_filename, codebook);
 		if (observations.empty())
 		{
+			// no more utterances
 			break;
 		}
 
@@ -221,7 +223,7 @@ vector<int> ModelTrainer::get_observations(const string &filename, const Codeboo
 	const string obs_filename = filename + observations_ext;
 	Logger::log("Getting", obs_filename);
 
-	observations = Utils::get_vector_from_file<int>(obs_filename);
+	observations = FileIO::get_vector_from_file<int>(obs_filename);
 	if (!observations.empty())
 	{
 		return observations;
@@ -234,7 +236,7 @@ vector<int> ModelTrainer::get_observations(const string &filename, const Codeboo
 	}
 
 	observations = codebook.observations(features);
-	Utils::set_vector_to_file<int>(observations, obs_filename);
+	FileIO::set_vector_to_file<int>(observations, obs_filename);
 
 	return observations;
 }

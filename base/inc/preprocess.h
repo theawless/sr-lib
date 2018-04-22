@@ -2,6 +2,7 @@
 
 #include <vector>
 
+/// Digital Processing of Speech Signals - Lawrence Rabiner, R.W. Schafer.
 class Preprocessor
 {
 public:

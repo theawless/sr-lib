@@ -6,8 +6,8 @@
 #include <thread>
 #include <utility>
 
+#include "file-io.h"
 #include "logger.h"
-#include "utils.h"
 
 using namespace std;
 
@@ -29,6 +29,7 @@ int GramTrainer::Builder::get_n_gram() const
 		return a.size() < b.size();
 	};
 
+	// because q_dfa is true, n_gram default will be max length possible
 	return max_element(sentences.begin(), sentences.end(), compare_size)->size();
 }
 
@@ -58,7 +59,7 @@ Gram GramTrainer::get_gram(int n) const
 	const string gram_filename = folder + to_string(n) + gram_ext;
 	Logger::log("Getting", gram_filename);
 
-	gram = Utils::get_item_from_file<Gram>(gram_filename);
+	gram = FileIO::get_item_from_file<Gram>(gram_filename);
 	if (!gram.empty())
 	{
 		return gram;
@@ -77,11 +78,12 @@ Gram GramTrainer::get_gram(int n) const
 
 			if (q_dfa)
 			{
+				// ensure only sequential sentences
 				break;
 			}
 		}
 	}
-	Utils::set_item_to_file<Gram>(gram, gram_filename);
+	FileIO::set_item_to_file<Gram>(gram, gram_filename);
 
 	return gram;
 }

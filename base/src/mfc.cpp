@@ -16,7 +16,7 @@ vector<vector<double>> MFC::setup_filter_bank()
 {
 	vector<vector<double>> filter_bank(n_filters, vector<double>(n_fft_bins, 0.0));
 
-	// calculate filter centre-frequencies
+	// filter centre-frequencies
 	vector<double> hz_filter_center(n_filters + 2, 0.0);
 	const function<double(double)> hertz2mel = [](double hz) { return 2595 * log10(1 + hz / 700); };
 	const function<double(double)> mel2hertz = [](double mel) { return 700 * (pow(10, mel / 2595) - 1); };
@@ -26,7 +26,7 @@ vector<vector<double>> MFC::setup_filter_bank()
 		hz_filter_center[i] = mel2hertz(low_mel + (high_mel - low_mel) / (n_filters + 1.0) * i);
 	}
 
-	// calculate FFT bin frequencies
+	// FFT bin frequencies
 	vector<double> hz_fft_bin(n_fft_bins, 0.0);
 	for (int i = 0; i < n_fft_bins; ++i)
 	{
@@ -98,6 +98,8 @@ vector<double> MFC::power_spectrum(const vector<double> &frame) const
 	return P;
 }
 
+/// https://rosettacode.org/wiki/Fast_Fourier_transform
+/// http://en.dsplib.org/content/fft_dec_in_freq/fft_dec_in_freq.html
 void MFC::fft(vector<complex<double>> &x) const
 {
 	const int N = x.size();
@@ -178,6 +180,7 @@ vector<double> MFC::dct(const vector<double> &H) const
 
 void MFC::normalise(vector<double> &C) const
 {
+	// ignore the gain term
 	const double mean_C = accumulate(C.begin() + 1, C.end(), 0.0) / (n_cepstra);
 
 	for (int i = 1; i < n_cepstra + 1; ++i)

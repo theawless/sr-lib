@@ -49,6 +49,7 @@ pair<bool, string> Recogniser::recognise(const string &filename)
 
 	if (word.first)
 	{
+		// add good word to context
 		context.push_back(word.second);
 	}
 

@@ -20,13 +20,14 @@ public:
 	friend std::ostream &operator<<(std::ostream &output, const Codebook &codebook);
 };
 
+/// An Algorithm for Vector Quantizer Design - Y. Linde, A. Buzo and R. Gray.
 class LBG
 {
 public:
 	/// Constructor.
 	LBG(int x_codebook);
 
-	/// Call Kmeans co-coroutine and split the centroids and till codebook size is reached.
+	/// Call Kmeans coroutine and split the centroids and till codebook size is reached.
 	Codebook generate(const std::vector<Feature> &universe) const;
 
 private:

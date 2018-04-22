@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "utils.h"
+#include "io.h"
 
 using namespace std;
 
@@ -12,6 +12,7 @@ double Feature::distance(const Feature &feature) const
 
 	for (int i = 0; i < coefficients.size() && i < feature.coefficients.size(); ++i)
 	{
+		// euclidean distance
 		distance += pow((coefficients[i] - feature.coefficients[i]), 2);
 	}
 
@@ -20,14 +21,14 @@ double Feature::distance(const Feature &feature) const
 
 istream &operator>>(istream &input, Feature &feature)
 {
-	feature.coefficients = Utils::get_vector_from_stream<double>(input);
+	feature.coefficients = IO::get_vector_from_stream<double>(input);
 
 	return input;
 }
 
 ostream &operator<<(ostream &output, const Feature &feature)
 {
-	output << Utils::get_string_from_vector<double>(feature.coefficients);
+	output << IO::get_string_from_vector<double>(feature.coefficients);
 
 	return output;
 }
@@ -71,11 +72,12 @@ vector<Feature> ICepstral::features(const vector<vector<double>> &frames) const
 	return mixed_features;
 }
 
+/// http://www1.icsi.berkeley.edu/Speech/docs/HTKBook/node65_mn.html
 vector<Feature> ICepstral::delta(const vector<Feature> &features, int W)
 {
 	vector<Feature> delta = features;
 
-	const double denominator = W * (2.0 * W + 1.0) * (W + 1.0) / 3.0 - pow(W, 2);
+	const double denominator = W * (W + 1.0) * (2.0 * W + 1.0) / 3.0 - pow(W, 2);
 	for (int i = W; i < (int)features.size() - W; ++i)
 	{
 		for (int j = 0; j < features[0].coefficients.size(); ++j)

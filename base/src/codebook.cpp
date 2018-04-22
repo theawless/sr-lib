@@ -1,8 +1,7 @@
 #include "codebook.h"
 
 #include "k-means.h"
-#include "logger.h"
-#include "utils.h"
+#include "io.h"
 
 using namespace std;
 
@@ -18,14 +17,14 @@ vector<int> Codebook::observations(const vector<Feature> &features) const
 
 istream &operator>>(istream &input, Codebook &codebook)
 {
-	codebook.centroids = Utils::get_vector_from_stream<Feature>(input, '\n');
+	codebook.centroids = IO::get_vector_from_stream<Feature>(input, '\n');
 
 	return input;
 }
 
 ostream &operator<<(ostream &output, const Codebook &codebook)
 {
-	output << Utils::get_string_from_vector<Feature>(codebook.centroids, '\n');
+	output << IO::get_string_from_vector<Feature>(codebook.centroids, '\n');
 
 	return output;
 }
@@ -45,7 +44,6 @@ Codebook LBG::generate(const vector<Feature> &universe) const
 	do
 	{
 		m *= 2;
-		Logger::log("LBG: m is:", m);
 
 		split(codebook.centroids);
 		codebook.centroids = kmeans.optimise(codebook.centroids);

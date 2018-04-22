@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-/// Thanks to https://github.com/progschj/ThreadPool
+/// https://github.com/progschj/ThreadPool
 class ThreadPool
 {
 public:
@@ -63,7 +63,7 @@ private:
 	std::condition_variable condition;
 
 	/// Indefinitely fetch tasks from the queue.
-	void worker()
+	inline void worker()
 	{
 		while (true)
 		{

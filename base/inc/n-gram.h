@@ -17,6 +17,7 @@ struct Gram
 	friend std::ostream &operator<<(std::ostream &output, const Gram &gram);
 };
 
+/// https://github.com/Elucidation/Ngram-Tutorial/blob/master/NgramTutorial.ipynb
 class MLE
 {
 private:

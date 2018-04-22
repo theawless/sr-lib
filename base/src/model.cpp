@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "utils.h"
+#include "io.h"
 
 using namespace std;
 
@@ -99,7 +99,7 @@ istream &operator>>(istream &input, Model &model)
 	std::getline(input, line);
 	std::getline(input, line);
 	stream << line;
-	model.pi = Utils::get_vector_from_stream<double>(stream);
+	model.pi = IO::get_vector_from_stream<double>(stream);
 
 	// a
 	std::getline(input, line);
@@ -108,7 +108,7 @@ istream &operator>>(istream &input, Model &model)
 	{
 		stream << line << '\n';
 	}
-	model.a = Utils::get_matrix_from_stream<double>(stream);
+	model.a = IO::get_matrix_from_stream<double>(stream);
 
 	// b
 	stream = std::stringstream();
@@ -116,7 +116,7 @@ istream &operator>>(istream &input, Model &model)
 	{
 		stream << line << '\n';
 	}
-	model.b = Utils::get_matrix_from_stream<double>(stream);
+	model.b = IO::get_matrix_from_stream<double>(stream);
 
 	return input;
 }
@@ -124,11 +124,11 @@ istream &operator>>(istream &input, Model &model)
 ostream &operator<<(ostream &output, const Model &model)
 {
 	output << "pi" << '\n';
-	output << Utils::get_string_from_vector<double>(model.pi) << '\n';
+	output << IO::get_string_from_vector<double>(model.pi) << '\n';
 	output << "a" << '\n';
-	output << Utils::get_string_from_matrix<double>(model.a) << '\n';
+	output << IO::get_string_from_matrix<double>(model.a) << '\n';
 	output << "b" << '\n';
-	output << Utils::get_string_from_matrix<double>(model.b) << '\n';
+	output << IO::get_string_from_matrix<double>(model.b) << '\n';
 
 	return output;
 }

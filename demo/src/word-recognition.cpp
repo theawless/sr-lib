@@ -6,21 +6,22 @@
 #include <vector>
 
 #include "config.h"
+#include "file-io.h"
 #include "logger.h"
 #include "model-tester.h"
 #include "model-trainer.h"
-#include "utils.h"
 
 using namespace std;
 
+/// Test the word recognition.
 int main()
 {
 	const string folder = "res/";
 
 	const string config_filename = folder + "sr-lib.config";
 	const string words_filename = folder + "sr-lib.words";
-	const Config config = Utils::get_item_from_file<Config>(config_filename);
-	const vector<string> words = Utils::get_vector_from_file<string>(words_filename);
+	const Config config = FileIO::get_item_from_file<Config>(config_filename);
+	const vector<string> words = FileIO::get_vector_from_file<string>(words_filename);
 
 	Logger::info("Training...");
 	chrono::steady_clock::time_point start = chrono::steady_clock::now();
@@ -43,6 +44,7 @@ int main()
 			const pair<bool, vector<double>> scores = model_tester->test(test_filename);
 			if (!scores.first)
 			{
+				// no more utterances
 				break;
 			}
 

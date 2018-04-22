@@ -5,11 +5,11 @@
 #include <future>
 #include <thread>
 
+#include "file-io.h"
 #include "hmm.h"
 #include "logger.h"
 #include "lpc.h"
 #include "mfc.h"
-#include "utils.h"
 #include "wav.h"
 
 using namespace std;
@@ -48,7 +48,7 @@ Codebook ModelTester::Builder::get_codebook() const
 	const string codebook_filename = folder + codebook_ext;
 	Logger::log("Getting", codebook_filename);
 
-	return Utils::get_item_from_file<Codebook>(codebook_filename);
+	return FileIO::get_item_from_file<Codebook>(codebook_filename);
 }
 
 vector<Model> ModelTester::Builder::get_models() const
@@ -62,9 +62,10 @@ vector<Model> ModelTester::Builder::get_models() const
 		const string model_filename = filename + model_ext;
 		Logger::log("Getting", model_filename);
 
-		model = Utils::get_item_from_file<Model>(model_filename);
+		model = FileIO::get_item_from_file<Model>(model_filename);
 		if (model.empty())
 		{
+			// no more models
 			break;
 		}
 
@@ -97,6 +98,7 @@ pair<bool, vector<double>> ModelTester::test(const string &filename) const
 	const double max_score = *max_element(scores.second.begin(), scores.second.end());
 	for (int i = 0; i < models.size(); ++i)
 	{
+		// https://stats.stackexchange.com/questions/66616/converting-normalizing-very-small-likelihood-values-to-probability
 		scores.second[i] = exp(scores.second[i] - max_score);
 	}
 
@@ -131,10 +133,11 @@ vector<Feature> ModelTester::get_features(const string &filename) const
 	Logger::log("Getting features");
 
 	const string wav_filename = filename + wav_ext;
-	const Wav wav_file(wav_filename);
+	const Wav wav_file = FileIO::get_item_from_file<Wav>(wav_filename);
 	const vector<double> samples = wav_file.samples<double>();
 	if (samples.empty())
 	{
+		// wav file not found
 		return features;
 	}
 

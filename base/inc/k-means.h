@@ -5,6 +5,7 @@
 
 #include "feature.h"
 
+/// Fundamentals of Speech Recognition - Lawrence Rabiner, Biing-Hwang Juang.
 class KMeans
 {
 public:

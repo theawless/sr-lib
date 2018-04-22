@@ -2,8 +2,8 @@
 
 #include <limits>
 
+#include "file-io.h"
 #include "logger.h"
-#include "utils.h"
 
 using namespace std;
 
@@ -27,9 +27,10 @@ vector<Gram> GramTester::Builder::get_grams() const
 	{
 		const string gram_filename = folder + to_string(i) + gram_ext;
 		Logger::log("Getting", gram_filename);
-		const Gram gram = Utils::get_item_from_file<Gram>(gram_filename);
+		const Gram gram = FileIO::get_item_from_file<Gram>(gram_filename);
 		if (gram.empty())
 		{
+			// case when n_gram was set to maximum because q_dfa was true
 			break;
 		}
 
@@ -52,10 +53,12 @@ pair<bool, double> GramTester::test(const vector<string> &full_context, const st
 	{
 		if (q_dfa)
 		{
+			// illegal case
 			return score;
 		}
 		else
 		{
+			// use the most recent words
 			context = vector<string>(full_context.end() - n_gram + 1, full_context.end());
 		}
 	}

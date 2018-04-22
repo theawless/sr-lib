@@ -66,6 +66,7 @@ void Preprocessor::normalise(vector<double> &samples) const
 	}
 }
 
+/// A New Silence Removal and Endpoint Detection Algorithm for Speech and Speaker Recognition Applications, IIT Kharagpur
 vector<double> Preprocessor::trim(const vector<double> &samples) const
 {
 	vector<double> trimmed_samples;
