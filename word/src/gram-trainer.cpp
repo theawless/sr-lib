@@ -12,14 +12,15 @@
 using namespace std;
 
 GramTrainer::Builder::Builder(const string &folder, const vector<vector<string>> &sentences, const Config &config) :
-	folder(folder), sentences(sentences), n_thread(config.get_val<int>("n_thread", 4 * thread::hardware_concurrency())),
+	folder(folder), sentences(sentences),
+	q_cache(config.get_val<bool>("q_cache", true)), n_thread(config.get_val<int>("n_thread", 4 * thread::hardware_concurrency())),
 	n_gram(config.get_val<int>("n_gram", get_n_gram())), q_dfa(config.get_val<bool>("q_dfa", true))
 {
 }
 
 unique_ptr<GramTrainer> GramTrainer::Builder::build() const
 {
-	return unique_ptr<GramTrainer>(new GramTrainer(folder, sentences, unique_ptr<ThreadPool>(new ThreadPool(n_thread)), n_gram, q_dfa));
+	return unique_ptr<GramTrainer>(new GramTrainer(folder, sentences, q_cache, unique_ptr<ThreadPool>(new ThreadPool(n_thread)), n_gram, q_dfa));
 }
 
 int GramTrainer::Builder::get_n_gram() const
@@ -46,8 +47,9 @@ void GramTrainer::train() const
 	}
 }
 
-GramTrainer::GramTrainer(string folder, vector<vector<string>> sentences, unique_ptr<ThreadPool> thread_pool, int n_gram, bool q_dfa) :
-	folder(folder), sentences(sentences), thread_pool(move(thread_pool)),
+GramTrainer::GramTrainer(string folder, vector<vector<string>> sentences, bool q_cache, unique_ptr<ThreadPool> thread_pool, int n_gram, bool q_dfa) :
+	folder(folder), sentences(sentences),
+	thread_pool(move(thread_pool)), q_cache(q_cache),
 	n_gram(n_gram), q_dfa(q_dfa)
 {
 	train();
@@ -59,10 +61,13 @@ Gram GramTrainer::get_gram(int n) const
 	const string gram_filename = folder + to_string(n) + gram_ext;
 	Logger::log("Getting", gram_filename);
 
-	gram = FileIO::get_item_from_file<Gram>(gram_filename);
-	if (!gram.empty())
+	if (q_cache)
 	{
-		return gram;
+		gram = FileIO::get_item_from_file<Gram>(gram_filename);
+		if (!gram.empty())
+		{
+			return gram;
+		}
 	}
 
 	for (int i = 0; i < sentences.size(); ++i)

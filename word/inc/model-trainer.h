@@ -26,6 +26,7 @@ public:
 	private:
 		const std::string folder;
 		const std::vector<std::string> words;
+		const bool q_cache;
 		const int n_thread;
 		const bool q_trim;
 		const int x_frame;
@@ -58,6 +59,7 @@ private:
 
 	const std::string folder;
 	const std::vector<std::string> words;
+	const bool q_cache;
 	const std::unique_ptr<ThreadPool> thread_pool;
 	const Preprocessor preprocessor;
 	const std::unique_ptr<ICepstral> cepstral;
@@ -66,7 +68,7 @@ private:
 	const int n_retrain;
 
 	/// Constructor.
-	ModelTrainer(std::string folder, std::vector<std::string> words, std::unique_ptr<ThreadPool> thread_pool, Preprocessor preprocessor, std::unique_ptr<ICepstral> cepstral, LBG lbg, Model::Builder model_builder, int n_retrain);
+	ModelTrainer(std::string folder, std::vector<std::string> words, bool q_cache, std::unique_ptr<ThreadPool> thread_pool, Preprocessor preprocessor, std::unique_ptr<ICepstral> cepstral, LBG lbg, Model::Builder model_builder, int n_retrain);
 
 	/// Build the codebook using lbg.
 	Codebook get_codebook() const;

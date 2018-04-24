@@ -9,6 +9,7 @@
 #include "io.h"
 
 /// Config keys
+/// q_cache      (bool):    whether cached training files should be used
 /// n_thread     (int):     number of threads used for parallel execution
 /// q_trim       (bool):    whether the samples should be trimmed for background noise
 /// x_frame      (int):     number of samples in a frame

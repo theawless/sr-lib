@@ -23,6 +23,7 @@ public:
 	private:
 		const std::string folder;
 		const std::vector<std::vector<std::string>> sentences;
+		const bool q_cache;
 		const int n_thread;
 		const int n_gram;
 		const bool q_dfa;
@@ -39,12 +40,13 @@ private:
 
 	const std::string folder;
 	const std::vector<std::vector<std::string>> sentences;
+	const bool q_cache;
 	const std::unique_ptr<ThreadPool> thread_pool;
 	const int n_gram;
 	const bool q_dfa;
 
 	/// Constructor.
-	GramTrainer(std::string folder, std::vector<std::vector<std::string>> sentences, std::unique_ptr<ThreadPool> thread_pool, int n_gram, bool q_dfa);
+	GramTrainer(std::string folder, std::vector<std::vector<std::string>> sentences, bool q_cache, std::unique_ptr<ThreadPool> thread_pool, int n_gram, bool q_dfa);
 
 	/// Get the gram for given n.
 	Gram get_gram(int n) const;
