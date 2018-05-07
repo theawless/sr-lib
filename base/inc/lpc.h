@@ -9,7 +9,7 @@ class LPC : public ICepstral
 {
 public:
 	/// Constructor.
-	LPC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel, int n_predict);
+	LPC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel);
 
 private:
 	const std::vector<double> sine_coefficients;

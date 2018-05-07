@@ -35,7 +35,6 @@ public:
 		const int x_overlap;
 		const std::string cepstral;
 		const int n_cepstra;
-		const int n_predict;
 		const bool q_gain;
 		const bool q_delta;
 		const bool q_accel;

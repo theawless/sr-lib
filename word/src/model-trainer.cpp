@@ -17,10 +17,10 @@ ModelTrainer::Builder::Builder(const string &folder, const vector<string> &words
 	folder(folder), words(words),
 	q_cache(config.get_val<bool>("q_cache", true)), n_thread(config.get_val<int>("n_thread", 4 * thread::hardware_concurrency())),
 	q_trim(config.get_val<bool>("q_trim", true)), x_frame(config.get_val<int>("x_frame", 300)), x_overlap(config.get_val<int>("x_overlap", 80)),
-	cepstral(config.get_val<string>("cepstral", "mfc")), n_cepstra(config.get_val<int>("n_cepstra", 12)), n_predict(config.get_val<int>("n_predict", 12)),
-	q_gain(config.get_val<bool>("q_gain", false)), q_delta(config.get_val<bool>("q_delta", false)), q_accel(config.get_val<bool>("q_accel", false)),
-	x_codebook(config.get_val<int>("x_codebook", 16)),
-	n_state(config.get_val<int>("n_state", 5)), n_bakis(config.get_val<int>("n_bakis", 1)), n_retrain(config.get_val<int>("n_retrain", 3))
+	cepstral(config.get_val<string>("cepstral", "mfc")), n_cepstra(config.get_val<int>("n_cepstra", 12)),
+	q_gain(config.get_val<bool>("q_gain", false)), q_delta(config.get_val<bool>("q_delta", true)), q_accel(config.get_val<bool>("q_accel", true)),
+	x_codebook(config.get_val<int>("x_codebook", 128)),
+	n_state(config.get_val<int>("n_state", 15)), n_bakis(config.get_val<int>("n_bakis", 3)), n_retrain(config.get_val<int>("n_retrain", 3))
 {
 }
 
@@ -35,7 +35,7 @@ unique_ptr<ICepstral> ModelTrainer::Builder::get_cepstral() const
 
 	if (cepstral == "lpc")
 	{
-		icepstal.reset(new LPC(n_cepstra, q_gain, q_delta, q_accel, n_predict));
+		icepstal.reset(new LPC(n_cepstra, q_gain, q_delta, q_accel));
 	}
 	else if (cepstral == "mfc")
 	{

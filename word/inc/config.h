@@ -16,7 +16,6 @@
 /// x_overlap    (int):     number of samples to be overlapped while framing
 /// cepstra      (string):  "mfc" or "lpc" variants of feature generation
 /// n_cepstra    (int):     number of features
-/// n_predict    (int):     P of autocorrelation, only for lpc
 /// q_gain       (bool):    whether gain term should be added to features
 /// q_delta      (bool):    whether delta terms should be added to features
 /// q_accel      (bool):    whether accel terms should be added to features

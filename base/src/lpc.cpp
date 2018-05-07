@@ -4,8 +4,8 @@
 
 using namespace std;
 
-LPC::LPC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel, int n_predict) :
-	ICepstral(n_cepstra, q_gain, q_delta, q_accel), n_predict(n_predict), sine_coefficients(setup_sine_coefficients(n_cepstra))
+LPC::LPC(int n_cepstra, bool q_gain, bool q_delta, bool q_accel) :
+	ICepstral(n_cepstra, q_gain, q_delta, q_accel), n_predict(n_cepstra * 2.0 / 3.0), sine_coefficients(setup_sine_coefficients(n_cepstra))
 {
 }
 
