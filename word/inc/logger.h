@@ -35,7 +35,7 @@ namespace Logger
 	template<typename... Args>
 	inline void log(Args... args)
 	{
-#if DEBUG
+#ifndef NDEBUG
 		std::stringstream stream;
 		print(stream, args...);
 
