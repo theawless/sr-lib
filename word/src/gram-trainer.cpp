@@ -11,8 +11,8 @@
 
 using namespace std;
 
-GramTrainer::Builder::Builder(const string &folder, const vector<vector<string>> &sentences, const Config &config) :
-	folder(folder), sentences(sentences),
+GramTrainer::Builder::Builder(const string &model_folder, const vector<vector<string>> &sentences, const Config &config) :
+	model_folder(model_folder), sentences(sentences),
 	q_cache(config.get_val<bool>("q_cache", true)), n_thread(config.get_val<int>("n_thread", 4 * thread::hardware_concurrency())),
 	n_gram(config.get_val<int>("n_gram", get_n_gram())), q_dfa(config.get_val<bool>("q_dfa", true))
 {
@@ -20,7 +20,7 @@ GramTrainer::Builder::Builder(const string &folder, const vector<vector<string>>
 
 unique_ptr<GramTrainer> GramTrainer::Builder::build() const
 {
-	return unique_ptr<GramTrainer>(new GramTrainer(folder, sentences, q_cache, unique_ptr<ThreadPool>(new ThreadPool(n_thread)), n_gram, q_dfa));
+	return unique_ptr<GramTrainer>(new GramTrainer(model_folder, sentences, q_cache, unique_ptr<ThreadPool>(new ThreadPool(n_thread)), n_gram, q_dfa));
 }
 
 int GramTrainer::Builder::get_n_gram() const
@@ -47,8 +47,8 @@ void GramTrainer::train() const
 	}
 }
 
-GramTrainer::GramTrainer(string folder, vector<vector<string>> sentences, bool q_cache, unique_ptr<ThreadPool> thread_pool, int n_gram, bool q_dfa) :
-	folder(folder), sentences(sentences),
+GramTrainer::GramTrainer(string model_folder, vector<vector<string>> sentences, bool q_cache, unique_ptr<ThreadPool> thread_pool, int n_gram, bool q_dfa) :
+	model_folder(model_folder), sentences(sentences),
 	thread_pool(move(thread_pool)), q_cache(q_cache),
 	n_gram(n_gram), q_dfa(q_dfa)
 {
@@ -57,9 +57,9 @@ GramTrainer::GramTrainer(string folder, vector<vector<string>> sentences, bool q
 
 Gram GramTrainer::get_gram(int n) const
 {
+	Logger::log("Getting gram:", n);
 	Gram gram;
-	const string gram_filename = folder + to_string(n) + gram_ext;
-	Logger::log("Getting", gram_filename);
+	const string gram_filename = model_folder + to_string(n) + gram_ext;
 
 	if (q_cache)
 	{

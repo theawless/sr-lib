@@ -14,8 +14,8 @@
 
 using namespace std;
 
-ModelTester::Builder::Builder(const string &folder, const Config &config) :
-	folder(folder), n_thread(config.get_val<int>("n_thread", 4 * thread::hardware_concurrency())),
+ModelTester::Builder::Builder(const string &model_folder, const Config &config) :
+	model_folder(model_folder), n_thread(config.get_val<int>("n_thread", 4 * thread::hardware_concurrency())),
 	q_trim(config.get_val<bool>("q_trim", true)), x_frame(config.get_val<int>("x_frame", 300)), x_overlap(config.get_val<int>("x_overlap", 80)),
 	cepstral(config.get_val<string>("cepstral", "mfc")), n_cepstra(config.get_val<int>("n_cepstra", 12)),
 	q_gain(config.get_val<bool>("q_gain", false)), q_delta(config.get_val<bool>("q_delta", true)), q_accel(config.get_val<bool>("q_accel", true))
@@ -45,8 +45,8 @@ unique_ptr<ICepstral> ModelTester::Builder::get_cepstral() const
 
 Codebook ModelTester::Builder::get_codebook() const
 {
-	const string codebook_filename = folder + codebook_ext;
-	Logger::log("Getting", codebook_filename);
+	Logger::log("Loading codebook");
+	const string codebook_filename = model_folder + codebook_ext;
 
 	return FileIO::get_item_from_file<Codebook>(codebook_filename);
 }
@@ -57,10 +57,10 @@ vector<Model> ModelTester::Builder::get_models() const
 
 	for (int i = 0; ; ++i)
 	{
+		Logger::log("Loading model:", i);
 		Model model;
-		const string filename = folder + to_string(i);
+		const string filename = model_folder + to_string(i);
 		const string model_filename = filename + model_ext;
-		Logger::log("Getting", model_filename);
 
 		model = FileIO::get_item_from_file<Model>(model_filename);
 		if (model.empty())

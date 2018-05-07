@@ -6,15 +6,15 @@
 
 using namespace std;
 
-Recogniser::Builder::Builder(const string &folder, const vector<string> &words, const vector<vector<string>> &sentences, const Config &config) :
-	folder(folder), words(words), sentences(sentences), config(config),
+Recogniser::Builder::Builder(const string &model_folder, const vector<string> &words, const vector<vector<string>> &sentences, const Config &config) :
+	model_folder(model_folder), words(words), sentences(sentences), config(config),
 	gram_weight(config.get_val<double>("gram_weight", 0.5)), cutoff_score(config.get_val<double>("cutoff_score", 0.5))
 {
 }
 
 unique_ptr<Recogniser> Recogniser::Builder::build() const
 {
-	return unique_ptr<Recogniser>(new Recogniser(words, sentences, ModelTester::Builder(folder, config).build(), GramTester::Builder(folder, config).build(), gram_weight, cutoff_score));
+	return unique_ptr<Recogniser>(new Recogniser(words, sentences, ModelTester::Builder(model_folder, config).build(), GramTester::Builder(model_folder, config).build(), gram_weight, cutoff_score));
 }
 
 pair<bool, string> Recogniser::recognise(const string &filename)

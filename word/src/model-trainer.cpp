@@ -13,8 +13,8 @@
 
 using namespace std;
 
-ModelTrainer::Builder::Builder(const string &folder, const vector<string> &words, const Config &config) :
-	folder(folder), words(words),
+ModelTrainer::Builder::Builder(const string &train_folder, const string &model_folder, const vector<string> &words, const Config &config) :
+	train_folder(train_folder), model_folder(model_folder), words(words),
 	q_cache(config.get_val<bool>("q_cache", true)), n_thread(config.get_val<int>("n_thread", 4 * thread::hardware_concurrency())),
 	q_trim(config.get_val<bool>("q_trim", true)), x_frame(config.get_val<int>("x_frame", 300)), x_overlap(config.get_val<int>("x_overlap", 80)),
 	cepstral(config.get_val<string>("cepstral", "mfc")), n_cepstra(config.get_val<int>("n_cepstra", 12)),
@@ -26,7 +26,7 @@ ModelTrainer::Builder::Builder(const string &folder, const vector<string> &words
 
 unique_ptr<ModelTrainer> ModelTrainer::Builder::build() const
 {
-	return unique_ptr<ModelTrainer>(new ModelTrainer(folder, words, q_cache, unique_ptr<ThreadPool>(new ThreadPool(n_thread)), Preprocessor(q_trim, x_frame, x_overlap), get_cepstral(), LBG(x_codebook), Model::Builder(n_state, x_codebook, n_bakis), n_retrain));
+	return unique_ptr<ModelTrainer>(new ModelTrainer(train_folder, model_folder, words, q_cache, unique_ptr<ThreadPool>(new ThreadPool(n_thread)), Preprocessor(q_trim, x_frame, x_overlap), get_cepstral(), LBG(x_codebook), Model::Builder(n_state, x_codebook, n_bakis), n_retrain));
 }
 
 unique_ptr<ICepstral> ModelTrainer::Builder::get_cepstral() const
@@ -60,8 +60,8 @@ void ModelTrainer::train() const
 	}
 }
 
-ModelTrainer::ModelTrainer(string folder, vector<string> words, bool q_cache, unique_ptr<ThreadPool> thread_pool, Preprocessor preprocessor, unique_ptr<ICepstral> cepstral, LBG lbg, Model::Builder model_builder, int n_retrain) :
-	folder(folder), words(words),
+ModelTrainer::ModelTrainer(string train_folder, string model_folder, vector<string> words, bool q_cache, unique_ptr<ThreadPool> thread_pool, Preprocessor preprocessor, unique_ptr<ICepstral> cepstral, LBG lbg, Model::Builder model_builder, int n_retrain) :
+	train_folder(train_folder), model_folder(model_folder), words(words),
 	q_cache(q_cache), thread_pool(move(thread_pool)),
 	preprocessor(preprocessor), cepstral(move(cepstral)), lbg(lbg), model_builder(model_builder), n_retrain(n_retrain)
 {
@@ -71,8 +71,8 @@ ModelTrainer::ModelTrainer(string folder, vector<string> words, bool q_cache, un
 Codebook ModelTrainer::get_codebook() const
 {
 	Codebook codebook;
-	const string codebook_filename = folder + codebook_ext;
-	Logger::log("Getting", codebook_filename);
+	const string codebook_filename = model_folder + codebook_ext;
+	Logger::log("Getting codebook");
 
 	if (q_cache)
 	{
@@ -92,9 +92,9 @@ Codebook ModelTrainer::get_codebook() const
 
 vector<Feature> ModelTrainer::get_universe() const
 {
+	Logger::log("Getting universe");
 	vector<Feature> universe;
-	const string universe_filename = folder + universe_ext;
-	Logger::log("Getting", universe_filename);
+	const string universe_filename = model_folder + universe_ext;
 
 	if (q_cache)
 	{
@@ -108,8 +108,7 @@ vector<Feature> ModelTrainer::get_universe() const
 	vector<future<vector<Feature>>> word_universe_futures;
 	for (int i = 0; i < words.size(); ++i)
 	{
-		const string word_filename = folder + words[i];
-		word_universe_futures.push_back(thread_pool->enqueue(&ModelTrainer::get_word_universe, this, word_filename));
+		word_universe_futures.push_back(thread_pool->enqueue(&ModelTrainer::get_word_universe, this, i));
 	}
 	for (int i = 0; i < words.size(); ++i)
 	{
@@ -122,14 +121,13 @@ vector<Feature> ModelTrainer::get_universe() const
 	return universe;
 }
 
-vector<Feature> ModelTrainer::get_word_universe(const string &filename) const
+vector<Feature> ModelTrainer::get_word_universe(int word_index) const
 {
 	vector<Feature> word_universe;
 
 	for (int i = 0; ; ++i)
 	{
-		const string utterance_filename = filename + "_" + to_string(i);
-		const vector<Feature> features = get_features(utterance_filename);
+		const vector<Feature> features = get_features(i, word_index);
 		if (features.empty())
 		{
 			break;
@@ -141,11 +139,11 @@ vector<Feature> ModelTrainer::get_word_universe(const string &filename) const
 	return word_universe;
 }
 
-vector<Feature> ModelTrainer::get_features(const string &filename) const
+vector<Feature> ModelTrainer::get_features(int utterance_index, int word_index) const
 {
+	Logger::log("Getting features:", word_index, utterance_index);
 	vector<Feature> features;
-	const string features_filename = filename + features_ext;
-	Logger::log("Getting", features_filename);
+	const string features_filename = model_folder + words[word_index] + '_' + to_string(utterance_index) + features_ext;
 
 	if (q_cache)
 	{
@@ -156,7 +154,7 @@ vector<Feature> ModelTrainer::get_features(const string &filename) const
 		}
 	}
 
-	const string wav_filename = filename + wav_ext;
+	const string wav_filename = train_folder + words[word_index] + '_' + to_string(utterance_index) + wav_ext;
 	const Wav wav_file = FileIO::get_item_from_file<Wav>(wav_filename);
 	const vector<double> samples = wav_file.samples<double>();
 	if (samples.empty())
@@ -174,9 +172,9 @@ vector<Feature> ModelTrainer::get_features(const string &filename) const
 
 Model ModelTrainer::get_word_model(int word_index, const Codebook &codebook) const
 {
+	Logger::log("Getting model:", word_index);
 	Model model;
-	const string model_filename = folder + to_string(word_index) + model_ext;
-	Logger::log("Getting", model_filename);
+	const string model_filename = model_folder + to_string(word_index) + model_ext;
 
 	if (q_cache)
 	{
@@ -190,10 +188,9 @@ Model ModelTrainer::get_word_model(int word_index, const Codebook &codebook) con
 	model = model_builder.bakis();
 	for (int j = 0; j < n_retrain; ++j)
 	{
+		Logger::log("Getting train model:", word_index, j);
 		Model train_model;
-		const string filename = folder + words[word_index];
-		const string train_model_filename = filename + model_ext + "_" + to_string(j);
-		Logger::log("Getting", train_model_filename);
+		const string train_model_filename = model_folder + words[word_index] + model_ext + "_" + to_string(j);
 
 		if (q_cache)
 		{
@@ -205,7 +202,7 @@ Model ModelTrainer::get_word_model(int word_index, const Codebook &codebook) con
 			}
 		}
 
-		train_model = get_utterance_model(filename, codebook, model);
+		train_model = get_utterance_model(word_index, model, codebook);
 		FileIO::set_item_to_file<Model>(train_model, train_model_filename);
 		model = train_model;
 	}
@@ -214,14 +211,13 @@ Model ModelTrainer::get_word_model(int word_index, const Codebook &codebook) con
 	return model;
 }
 
-Model ModelTrainer::get_utterance_model(const string &filename, const Codebook &codebook, const Model &train_model) const
+Model ModelTrainer::get_utterance_model(int word_index, const Model &train_model, const Codebook &codebook) const
 {
 	vector<Model> utterance_models;
 
 	for (int i = 0; ; ++i)
 	{
-		const string utterance_filename = filename + "_" + to_string(i);
-		const vector<int> observations = get_observations(utterance_filename, codebook);
+		const vector<int> observations = get_observations(i, word_index, codebook);
 		if (observations.empty())
 		{
 			// no more utterances
@@ -234,11 +230,11 @@ Model ModelTrainer::get_utterance_model(const string &filename, const Codebook &
 	return model_builder.merge(utterance_models);
 }
 
-vector<int> ModelTrainer::get_observations(const string &filename, const Codebook &codebook) const
+vector<int> ModelTrainer::get_observations(int utterance_index, int word_index, const Codebook &codebook) const
 {
+	Logger::log("Getting observations:", word_index, utterance_index);
 	vector<int> observations;
-	const string obs_filename = filename + observations_ext;
-	Logger::log("Getting", obs_filename);
+	const string obs_filename =  + observations_ext;
 
 	if (q_cache)
 	{
@@ -249,7 +245,7 @@ vector<int> ModelTrainer::get_observations(const string &filename, const Codeboo
 		}
 	}
 
-	const vector<Feature> features = get_features(filename);
+	const vector<Feature> features = get_features(utterance_index, word_index);
 	if (features.empty())
 	{
 		return observations;

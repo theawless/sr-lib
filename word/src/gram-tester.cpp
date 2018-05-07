@@ -7,8 +7,8 @@
 
 using namespace std;
 
-GramTester::Builder::Builder(const string &folder, const Config &config) :
-	folder(folder),
+GramTester::Builder::Builder(const string &model_folder, const Config &config) :
+	model_folder(model_folder),
 	n_gram(config.get_val<int>("n_gram", numeric_limits<int>::max())), q_dfa(config.get_val<bool>("q_dfa", true))
 {
 }
@@ -25,8 +25,8 @@ vector<Gram> GramTester::Builder::get_grams() const
 
 	for (int i = 0; i <= n_gram; ++i)
 	{
-		const string gram_filename = folder + to_string(i) + gram_ext;
-		Logger::log("Getting", gram_filename);
+		Logger::log("Loading gram:", i);
+		const string gram_filename = model_folder + to_string(i) + gram_ext;
 		const Gram gram = FileIO::get_item_from_file<Gram>(gram_filename);
 		if (gram.empty())
 		{

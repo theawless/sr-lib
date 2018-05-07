@@ -26,11 +26,12 @@ int main()
 	Logger::info("Training...");
 	chrono::steady_clock::time_point start = chrono::steady_clock::now();
 	const string train_folder = folder + "train/";
-	const unique_ptr<ModelTrainer> model_trainer = ModelTrainer::Builder(train_folder, words, config).build();
-	const unique_ptr<ModelTester> model_tester = ModelTester::Builder(train_folder, config).build();
+	const string model_folder = folder + "model/";
+	const unique_ptr<ModelTrainer> model_trainer = ModelTrainer::Builder(train_folder, model_folder, words, config).build();
+	const unique_ptr<ModelTester> model_tester = ModelTester::Builder(model_folder, config).build();
 	chrono::steady_clock::time_point end = chrono::steady_clock::now();
-	chrono::seconds time = chrono::duration_cast<chrono::seconds>(end - start);
-	Logger::info("Time taken:", time.count(), "seconds");
+	chrono::milliseconds time = chrono::duration_cast<chrono::milliseconds>(end - start);
+	Logger::info("Time taken:", time.count(), "ms");
 
 	Logger::info("Testing...");
 	start = chrono::steady_clock::now();
@@ -60,11 +61,11 @@ int main()
 			n_utterances[i]++;
 		}
 	}
-	end = chrono::steady_clock::now();
-	time = chrono::duration_cast<chrono::seconds>(end - start);
-	Logger::info("Time taken:", time.count(), "seconds");
-
 	const int total_utterances = accumulate(n_utterances.begin(), n_utterances.end(), 0);
+	end = chrono::steady_clock::now();
+	time = chrono::duration_cast<chrono::milliseconds>(end - start);
+	Logger::info("Time taken per utterance:", time.count() / total_utterances, "ms");
+
 	const int total_hits = accumulate(n_hits.begin(), n_hits.end(), 0);
 	const int total_errs = accumulate(n_errs.begin(), n_errs.end(), 0);
 	Logger::info("Hit percent is:", (total_hits * 100.0) / total_utterances);

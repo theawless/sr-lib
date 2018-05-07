@@ -18,13 +18,14 @@ public:
 	{
 	public:
 		/// Constructor.
-		Builder(const std::string &folder, const std::vector<std::string> &words, const Config &config);
+		Builder(const std::string &train_folder, const std::string &model_folder, const std::vector<std::string> &words, const Config &config);
 
 		/// Build the ModelTrainer.
 		std::unique_ptr<ModelTrainer> build() const;
 
 	private:
-		const std::string folder;
+		const std::string train_folder;
+		const std::string model_folder;
 		const std::vector<std::string> words;
 		const bool q_cache;
 		const int n_thread;
@@ -56,7 +57,8 @@ private:
 	static constexpr char const *observations_ext = ".observations";
 	static constexpr char const *model_ext = ".model";
 
-	const std::string folder;
+	const std::string train_folder;
+	const std::string model_folder;
 	const std::vector<std::string> words;
 	const bool q_cache;
 	const std::unique_ptr<ThreadPool> thread_pool;
@@ -67,7 +69,7 @@ private:
 	const int n_retrain;
 
 	/// Constructor.
-	ModelTrainer(std::string folder, std::vector<std::string> words, bool q_cache, std::unique_ptr<ThreadPool> thread_pool, Preprocessor preprocessor, std::unique_ptr<ICepstral> cepstral, LBG lbg, Model::Builder model_builder, int n_retrain);
+	ModelTrainer(std::string train_folder, std::string model_folder, std::vector<std::string> words, bool q_cache, std::unique_ptr<ThreadPool> thread_pool, Preprocessor preprocessor, std::unique_ptr<ICepstral> cepstral, LBG lbg, Model::Builder model_builder, int n_retrain);
 
 	/// Build the codebook using lbg.
 	Codebook get_codebook() const;
@@ -76,17 +78,17 @@ private:
 	std::vector<Feature> get_universe() const;
 
 	/// Build the word universe by accumulating features from all utterances.
-	std::vector<Feature> get_word_universe(const std::string &filename) const;
+	std::vector<Feature> get_word_universe(int word_index) const;
 
 	/// Load and preprocess the samples, and return their features.
-	std::vector<Feature> get_features(const std::string &filename) const;
+	std::vector<Feature> get_features(int utterance_index, int word_index) const;
 
 	/// Get the model for given word index.
 	Model get_word_model(int word_index, const Codebook &codebook) const;
 
 	/// Optimise the train model using the observations from utterances of the given filename.
-	Model get_utterance_model(const std::string &filename, const Codebook &codebook, const Model &train_model) const;
+	Model get_utterance_model(int word_index, const Model &train_model, const Codebook &codebook) const;
 
 	/// Get the observations sequence from the codebook.
-	std::vector<int> get_observations(const std::string &filename, const Codebook &codebook) const;
+	std::vector<int> get_observations(int utterance_index, int word_index, const Codebook &codebook) const;
 };

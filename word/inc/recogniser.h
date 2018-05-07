@@ -16,13 +16,13 @@ public:
 	{
 	public:
 		/// Constructor.
-		Builder(const std::string &folder, const std::vector<std::string> &words, const std::vector<std::vector<std::string>> &sentences, const Config &config);
+		Builder(const std::string &model_folder, const std::vector<std::string> &words, const std::vector<std::vector<std::string>> &sentences, const Config &config);
 
 		/// Build the Recogniser.
 		std::unique_ptr<Recogniser> build() const;
 
 	private:
-		const std::string folder;
+		const std::string model_folder;
 		const std::vector<std::string> words;
 		const std::vector<std::vector<std::string>> sentences;
 		const Config config;

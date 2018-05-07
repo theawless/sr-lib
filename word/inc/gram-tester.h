@@ -15,7 +15,7 @@ public:
 	{
 	public:
 		/// Constructor.
-		Builder(const std::string &folder, const Config &config);
+		Builder(const std::string &model_folder, const Config &config);
 
 		/// Build the GramTester.
 		std::unique_ptr<GramTester> build() const;
@@ -23,7 +23,7 @@ public:
 	private:
 		static constexpr char const *gram_ext = ".gram";
 
-		const std::string folder;
+		const std::string model_folder;
 		const int n_gram;
 		const bool q_dfa;
 

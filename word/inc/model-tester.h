@@ -19,7 +19,7 @@ public:
 	{
 	public:
 		/// Constructor.
-		Builder(const std::string &folder, const Config &config);
+		Builder(const std::string &model_folder, const Config &config);
 
 		/// Build the ModelTester.
 		std::unique_ptr<ModelTester> build() const;
@@ -28,7 +28,7 @@ public:
 		static constexpr char const *codebook_ext = "sr-lib.codebook";
 		static constexpr char const *model_ext = ".model";
 
-		const std::string folder;
+		const std::string model_folder;
 		const int n_thread;
 		const bool q_trim;
 		const int x_frame;
