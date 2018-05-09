@@ -22,6 +22,8 @@ C++ Automatic Speech Recognition library for my [BTech Project](https://github.c
 * Hidden Markov Model (HMM) - Baum–Welch, Viterbi
 * DFA and NGram
 
+![alt text](https://github.com/theawless/BTech-Project/blob/master/report/figures/training-flowchart.png)
+
 ### Extras
 * CSV Reader
 * Wave Reader
@@ -34,10 +36,10 @@ C++ Automatic Speech Recognition library for my [BTech Project](https://github.c
 sr-lib doesn't depend on any libraries other than the standard ones.
 
 For windows:
-* Get Visual Studio 2017 (with cmake tools).
+* Get Visual Studio 2017 (with CMake tools).
 * Open sr-lib as a folder
 * Click `Generate cache` from CMake menu
-* Click `Build All` from CMake menu
+* Click `Build all` from CMake menu
 * Select run target WordRecognition (preferably x64 release)
 * Run to see the demo
 * Profit???
